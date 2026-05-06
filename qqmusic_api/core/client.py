@@ -40,13 +40,11 @@ class Client:
         *,
         platform: Platform | None = None,
         device_path: str | None = None,
-        enable_sign: bool = False,
     ):
         """初始化客户端实例."""
         self._session = AsyncSession()
         self.credential = credential or Credential()
         self.platform = platform or Platform.ANDROID
-        self.enable_sign = enable_sign
 
         self._device_store = DeviceManager(device_path)
 
