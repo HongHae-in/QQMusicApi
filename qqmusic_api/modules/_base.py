@@ -44,6 +44,8 @@ class ApiModule:
         url: str,
         credential: "Credential | None" = None,
         platform: Platform | None = None,
+        *,
+        lazy: bool = False,
         **kwargs: Any,
     ):
         """发送请求并自动携带对应凭证与平台 User-Agent.
@@ -53,6 +55,7 @@ class ApiModule:
             url: 目标 URL.
             credential: 请求凭证 (默认使用客户端凭证).
             platform: 请求平台 (默认使用客户端平台).
+            lazy: 是否延迟发送请求.
             **kwargs: 透传给底层客户端的参数.
 
         Returns:
@@ -63,6 +66,7 @@ class ApiModule:
             url=url,
             credential=credential,
             platform=platform,
+            lazy=lazy,
             **kwargs,
         )
 

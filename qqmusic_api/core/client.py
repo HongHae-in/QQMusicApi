@@ -1,18 +1,19 @@
 """API 客户端核心实现. 整合网络传输、鉴权与业务模块访问."""
 
 import uuid
+from collections import defaultdict
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
-from niquests import AsyncSession
+from niquests import AsyncSession, AsyncTokenBucketLimiter
 from niquests.models import Response
 from tarsio import TarsDict
 
-from ..models.request import Credential, JceRequest, JceRequestItem, JceResponse, RequestItem
+from ..models.request import Credential, JceRequest, JceRequestItem, JceResponse, JceResponseItem, RequestItem
 from ..utils.common import bool_to_int
 from ..utils.device import DeviceManager
 from ..utils.qimei import QimeiManager
-from .exceptions import _build_api_error, _extract_api_error_code
+from .exceptions import ApiDataError, HTTPError, LoginExpiredError, RatelimitedError
 from .request import Request, RequestResultT, _build_result
 from .versioning import DEFAULT_VERSION_POLICY, Platform, VersionPolicy
 
@@ -30,6 +31,8 @@ if TYPE_CHECKING:
     from ..modules.top import TopApi
     from ..modules.user import UserApi
 
+_SENTINEL = object()
+
 
 class Client:
     """QQMusic API Client."""
@@ -40,9 +43,22 @@ class Client:
         *,
         platform: Platform | None = None,
         device_path: str | None = None,
+        rate: float = 10.0,
+        capacity: float = 50.0,
     ):
-        """初始化客户端实例."""
-        self._session = AsyncSession()
+        """初始化客户端实例.
+
+        Args:
+            credential: 全局默认凭证.
+            platform: 全局默认请求平台.
+            device_path: 设备信息文件路径.
+            rate: 请求速率限制 (请求/秒). 默认为 10.
+            capacity: 令牌桶容量, 允许的突发请求数. 默认为 50.
+        """
+        self._session = AsyncSession(
+            multiplexed=True,
+            hooks=AsyncTokenBucketLimiter(rate=rate, capacity=capacity),
+        )
         self.credential = credential or Credential()
         self.platform = platform or Platform.ANDROID
 
@@ -169,6 +185,8 @@ class Client:
         url: str,
         credential: Credential | None = None,
         platform: Platform | None = None,
+        *,
+        lazy: bool = False,
         **kwargs: Any,
     ):
         """发送带有凭证和 User-Agent 的 HTTP 请求.
@@ -180,6 +198,7 @@ class Client:
             url: URL 地址.
             credential: 请求凭证.
             platform: 请求平台.
+            lazy: 是否延迟发送请求.
             **kwargs: 其他参数.
         """
         cred = credential or self.credential
@@ -200,11 +219,10 @@ class Client:
             headers["User-Agent"] = await self._get_user_agent(platform)
         kwargs["headers"] = headers
 
-        return await self._session.request(
-            method,
-            url,
-            **kwargs,
-        )
+        resp = await self._session.request(method, url, **kwargs)
+        if not lazy:
+            await self._session.gather(resp)
+        return resp
 
     async def request_api(
         self,
@@ -214,7 +232,7 @@ class Client:
         platform: Platform | None = None,
         *,
         is_jce: bool = False,
-        preserve_bool: bool = False,
+        lazy: bool = False,
     ) -> Response:
         """发送 API 请求."""
         platform = Platform.ANDROID if is_jce else platform or self.platform
@@ -247,71 +265,226 @@ class Client:
                     for idx, req in enumerate(data)
                 },
             ).encode()
-            return await self._session.post(
+            resp = await self._session.post(
                 "http://u.y.qq.com/cgi-bin/musicw.fcg",
                 data=content,
                 headers={"User-Agent": user_agent},
             )
+            if not lazy:
+                await self._session.gather(resp)
+            return resp
 
         payload: dict[str, Any] = {
             "comm": finalcomm,
         }
+        params = {}
         for idx, req in enumerate(data):
             payload[f"req_{idx}"] = {
                 "module": req["module"],
                 "method": req["method"],
-                "param": req["param"] if preserve_bool else bool_to_int(req["param"]),
+                "param": req["param"] if req["preserve_bool"] else bool_to_int(req["param"]),
             }
-        params = {}
 
-        return await self._session.post(
+        resp = await self._session.post(
             "https://u.y.qq.com/cgi-bin/musicu.fcg",
             json=payload,
             params=params,
             headers={"User-Agent": user_agent},
         )
+        if not lazy:
+            await self._session.gather(resp)
+
+        return resp
+
+    @overload
+    async def gather(
+        self,
+        requests: list[Request[RequestResultT]],
+        *,
+        batch_size: int = ...,
+        return_exceptions: Literal[False] = False,
+    ) -> list[RequestResultT]: ...
+
+    @overload
+    async def gather(
+        self,
+        requests: list[Request[RequestResultT]],
+        *,
+        batch_size: int = ...,
+        return_exceptions: Literal[True],
+    ) -> list[RequestResultT | Exception]: ...
+
+    @overload
+    async def gather(
+        self,
+        requests: list[Request[Any]],
+        *,
+        batch_size: int = ...,
+        return_exceptions: Literal[False] = False,
+    ) -> list[Any]: ...
+
+    @overload
+    async def gather(
+        self,
+        requests: list[Request[Any]],
+        *,
+        batch_size: int = ...,
+        return_exceptions: Literal[True],
+    ) -> list[Any | Exception]: ...
+
+    async def gather(
+        self,
+        requests: list[Request[Any]],
+        *,
+        batch_size: int = 20,
+        return_exceptions: bool = False,
+    ) -> list[Any]:
+        """并发执行多个请求描述符并按输入顺序返回解析结果.
+
+        可合并的请求会按协议、平台、公共参数和凭证分组, 每组按
+        `batch_size` 拆分为批量请求发送。响应解析失败时, 默认抛出
+        第一个异常; 当 `return_exceptions` 为 True 时, 异常会作为对应
+        位置的结果返回。
+
+        Args:
+            requests: 待执行的请求描述符列表.
+            batch_size: 每个批量请求包含的最大请求数.
+            return_exceptions: 是否将单项解析异常作为结果返回.
+
+        Returns:
+            与 `requests` 顺序一致的解析结果列表.
+
+        Raises:
+            ValueError: 当 `batch_size` 小于等于 0, 响应为空, 响应缺少对应
+                请求项, 或结果未能完整回填时抛出.
+        """
+        if batch_size <= 0:
+            raise ValueError("batch_size 必须大于 0")
+
+        if not requests:
+            return []
+
+        grouped_indices: dict[Any, list[int]] = defaultdict(list)
+        for index, request in enumerate(requests):
+            grouped_indices[request._group_key].append(index)
+
+        batch_responses: list[tuple[list[int], Response]] = []
+
+        for indices in grouped_indices.values():
+            base_req = requests[indices[0]]
+
+            for start in range(0, len(indices), batch_size):
+                batch_indices = indices[start : start + batch_size]
+                response_task = await self.request_api(
+                    data=[
+                        {
+                            "module": requests[i].module,
+                            "method": requests[i].method,
+                            "param": requests[i].param,
+                            "preserve_bool": requests[i].preserve_bool,
+                        }
+                        for i in batch_indices
+                    ],
+                    comm=base_req.comm,
+                    credential=base_req.credential,
+                    platform=base_req.platform,
+                    is_jce=base_req.is_jce,
+                    lazy=True,
+                )
+                batch_responses.append((batch_indices, response_task))
+
+        await self._session.gather(*(resp for _, resp in batch_responses))
+
+        results: list[Any] = [_SENTINEL] * len(requests)
+
+        for batch_indices, response in batch_responses:
+            data = self._vaildate_resp(response, is_jce=requests[batch_indices[0]].is_jce)
+            for batch_index, req_index in enumerate(batch_indices):
+                request = requests[req_index]
+                try:
+                    results[req_index] = self._parse_cgi_item(
+                        data[f"req_{batch_index}"],
+                        request,
+                    )
+                except Exception as exc:
+                    if return_exceptions:
+                        results[req_index] = exc
+                    else:
+                        raise
+
+        missing_indexes = [i for i, res in enumerate(results) if res is _SENTINEL]
+        if missing_indexes:
+            raise ApiDataError(f"缺少以下索引结果: {missing_indexes}")
+
+        return results
+
+    def _vaildate_resp(self, response: Response, *, is_jce: bool) -> dict[str, Any]:
+        """验证响应的基本有效性."""
+        if response.status_code != 200:
+            raise HTTPError(
+                f"HTTP请求失败: {response.status_code}",
+                status_code=cast("int", response.status_code),
+            )
+        if not response.content:
+            raise ApiDataError("响应无内容")
+        try:
+            resp = JceResponse.decode(response.content) if is_jce else response.json()
+        except Exception as exc:
+            raise ApiDataError("响应内容非有效 JCE 格式") from exc
+        code: int = resp.code if is_jce else cast("dict", resp).pop("code", 0)
+
+        if code != 0:
+            raise ApiDataError(f"API响应错误, code={code}, content={response.content!r}", data=response.text)
+
+        return resp.data if is_jce else cast("Any", resp)
+
+    def _parse_cgi_item(
+        self,
+        item: dict[str, Any] | JceResponseItem,
+        request: Request[RequestResultT],
+    ) -> RequestResultT:
+        """解析单个 CGI 响应项."""
+        if isinstance(item, JceResponseItem):
+            code = item.code
+            data = item.data
+        else:
+            code = item.get("code", 0)
+            data = item.get("data", {})
+
+        match code:
+            case 2001:
+                raise RatelimitedError()
+            case 1000 | 104401 | 104400:
+                raise LoginExpiredError()
+            case int() if code != 0:
+                raise ApiDataError(f"API响应错误, code={code}, content={data!r}")
+
+        return cast("RequestResultT", _build_result(data, request.response_model))
 
     async def execute(self, request: Request[RequestResultT]) -> RequestResultT:
-        """执行单个请求描述符并解析响应结果."""
+        """执行单个请求描述符并解析响应结果.
+
+        Args:
+            request: 待执行的请求描述符.
+
+        Returns:
+            解析后的响应数据或响应模型.
+
+        Raises:
+            ValueError: 当响应为空、业务返回码非 0 或响应缺少 `req_0` 时抛出.
+        """
         resp = await self.request_api(
             data=[
                 {
                     "module": request.module,
                     "method": request.method,
                     "param": request.param,
+                    "preserve_bool": request.preserve_bool,
                 }
             ],
             comm=request.comm,
             credential=request.credential,
             platform=request.platform,
             is_jce=request.is_jce,
-            preserve_bool=request.preserve_bool,
         )
-        resp.raise_for_status()
-
-        if not resp.content:
-            raise ValueError("Empty response content")
-
-        if request.is_jce:
-            body = JceResponse.decode(resp.content)
-            code = body.code
-            req = body.data.get("data", None)
-            if req is None:
-                raise ValueError("Missing 'data' in JCE response")
-            data = req.data
-        else:
-            body = resp.json()
-            code = body.get("code", 0)
-            req = body.get("req_0")
-            if req is None:
-                raise ValueError("Missing 'data' in JCE response")
-            data = req.get("data", {})
-
-        if code != 0:
-            raise ValueError(f"API error with code {code}: {body}")
-
-        req_code, subcode = _extract_api_error_code(req)
-        if req_code != 0:
-            raise _build_api_error(code=req_code, subcode=subcode)
-
-        return cast("RequestResultT", _build_result(data, request.response_model))
+        return self._parse_cgi_item(self._vaildate_resp(resp, is_jce=request.is_jce)["req_0"], request)

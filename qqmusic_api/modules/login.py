@@ -459,7 +459,8 @@ class LoginApi(ApiModule):
 
     async def _get_qq_qr(self) -> QR:
         """获取 QQ 授权二维码."""
-        response = await self._session.get(
+        response = await self._request(
+            "GET",
             "https://ssl.ptlogin2.qq.com/ptqrshow",
             params={
                 "appid": "716027609",
@@ -473,6 +474,7 @@ class LoginApi(ApiModule):
                 "pt_3rd_aid": "100497308",
             },
             headers={"Referer": "https://xui.ptlogin2.qq.com/"},
+            cookies={},
         )
         qrsig = response.cookies["qrsig"]  # type: ignore
         if not qrsig:
@@ -481,7 +483,8 @@ class LoginApi(ApiModule):
 
     async def _get_wx_qr(self) -> QR:
         """获取微信登录二维码."""
-        response = await self._session.get(
+        response = await self._request(
+            "GET",
             "https://open.weixin.qq.com/connect/qrconnect",
             params={
                 "appid": "wx48db31d50e334801",
@@ -491,6 +494,7 @@ class LoginApi(ApiModule):
                 "state": "STATE",
                 "href": "https://y.qq.com/mediastyle/music_v17/src/css/popup_wechat.css#wechat_redirect",
             },
+            cookies={},
         )
         if not response.text:
             raise _raise_login_error("获取二维码失败")
@@ -499,9 +503,11 @@ class LoginApi(ApiModule):
             raise _raise_login_error("获取 uuid 失败")
         uuid = matches[0]
         qrcode_data = (
-            await self._session.get(
+            await self._request(
+                "GET",
                 f"https://open.weixin.qq.com/connect/qrcode/{uuid}",
                 headers={"Referer": "https://open.weixin.qq.com/connect/qrconnect"},
+                cookies={},
             )
         ).content or b""
         return QR(qrcode_data, QRLoginType.WX, "image/jpeg", uuid)
@@ -537,7 +543,8 @@ class LoginApi(ApiModule):
         """检查 QQ 二维码状态."""
         qrsig = qrcode.identifier
         try:
-            response = await self._session.get(
+            response = await self._request(
+                "GET",
                 "https://ssl.ptlogin2.qq.com/ptqrlogin",
                 params={
                     "u1": "https://graph.qq.com/oauth2.0/login_jump",
@@ -557,7 +564,8 @@ class LoginApi(ApiModule):
                     "pt_3rd_aid": "100497308",
                     "has_onekey": "1",
                 },
-                headers={"Referer": "https://xui.ptlogin2.qq.com/", "Cookie": f"qrsig={qrsig}"},
+                headers={"Referer": "https://xui.ptlogin2.qq.com/"},
+                cookies={"qrsig": qrsig},
             )
         except HTTPError as exc:
             raise _raise_login_error("无效 qrsig", cause=exc) from exc
@@ -695,7 +703,8 @@ class LoginApi(ApiModule):
 
     async def _authorize_qq_qr(self, uin: str, sigx: str) -> Credential:
         """完成 QQ 二维码鉴权并返回凭证."""
-        response = await self._session.get(
+        response = await self._request(
+            "GET",
             "https://ssl.ptlogin2.graph.qq.com/check_sig",
             params={
                 "uin": uin,
@@ -719,12 +728,14 @@ class LoginApi(ApiModule):
             },
             headers={"Referer": "https://xui.ptlogin2.qq.com/"},
             allow_redirects=False,
+            cookies={},
         )
         p_skey = response.cookies["p_skey"]  # type: ignore
         if not p_skey:
             raise _raise_login_error("获取 p_skey 失败")
 
-        authorize_response = await self._client._session.post(
+        authorize_response = await self._request(
+            "POST",
             "https://graph.qq.com/oauth2.0/authorize",
             data={
                 "response_type": "code",
