@@ -5,8 +5,9 @@ from collections import defaultdict
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
-from niquests import AsyncSession, AsyncTokenBucketLimiter
+from niquests import AsyncSession, AsyncTokenBucketLimiter, PreparedRequest
 from niquests.models import Response
+from niquests.typing import AsyncHookType, ProxyType, TLSClientCertType, TLSVerifyType
 from tarsio import TarsDict
 
 from ..models.request import Credential, JceRequest, JceRequestItem, JceResponse, JceResponseItem, RequestItem
@@ -45,6 +46,10 @@ class Client:
         device_path: str | None = None,
         rate: float = 10.0,
         capacity: float = 50.0,
+        proxies: ProxyType | None = None,
+        cert: TLSClientCertType | None = None,
+        hooks: AsyncHookType[PreparedRequest | Response] | None = None,
+        verify: TLSVerifyType | None = None,
     ):
         """初始化客户端实例.
 
@@ -54,13 +59,23 @@ class Client:
             device_path: 设备信息文件路径.
             rate: 请求速率限制 (请求/秒). 默认为 10.
             capacity: 令牌桶容量, 允许的突发请求数. 默认为 50.
+            proxies: 代理配置, 详见 niquests 文档.
+            cert: TLS 客户端证书配置, 详见 niquests 文档.
+            verify: TLS 证书验证配置, 详见 niquests 文档.
+            hooks: 请求/响应钩子, 详见 niquests 文档.
         """
         self._session = AsyncSession(
             multiplexed=True,
             hooks=AsyncTokenBucketLimiter(rate=rate, capacity=capacity),
+            happy_eyeballs=True,
         )
         self.credential = credential or Credential()
         self.platform = platform or Platform.ANDROID
+
+        self.proxies = proxies
+        self.cert = cert
+        self.verify = verify
+        self.hooks = hooks
 
         self._device_store = DeviceManager(device_path)
 
@@ -219,7 +234,15 @@ class Client:
             headers["User-Agent"] = await self._get_user_agent(platform)
         kwargs["headers"] = headers
 
-        resp = await self._session.request(method, url, **kwargs)
+        resp = await self._session.request(
+            method,
+            url,
+            **kwargs,
+            proxies=self.proxies,
+            hooks=self.hooks,
+            cert=self.cert,
+            verify=self.verify,
+        )
         if not lazy:
             await self._session.gather(resp)
         return resp
@@ -269,6 +292,10 @@ class Client:
                 "http://u.y.qq.com/cgi-bin/musicw.fcg",
                 data=content,
                 headers={"User-Agent": user_agent},
+                proxies=self.proxies,
+                hooks=self.hooks,
+                cert=self.cert,
+                verify=self.verify,
             )
             if not lazy:
                 await self._session.gather(resp)
@@ -290,6 +317,10 @@ class Client:
             json=payload,
             params=params,
             headers={"User-Agent": user_agent},
+            proxies=self.proxies,
+            hooks=self.hooks,
+            cert=self.cert,
+            verify=self.verify,
         )
         if not lazy:
             await self._session.gather(resp)
