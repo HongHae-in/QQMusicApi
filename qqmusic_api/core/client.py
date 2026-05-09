@@ -9,6 +9,7 @@ from niquests import AsyncSession, AsyncTokenBucketLimiter, PreparedRequest
 from niquests.models import Response
 from niquests.typing import AsyncHookType, ProxyType, TLSClientCertType, TLSVerifyType
 from tarsio import TarsDict
+from urllib3.util.retry import Retry
 
 from ..models.request import Credential, JceRequest, JceRequestItem, JceResponse, JceResponseItem, RequestItem
 from ..utils.common import bool_to_int
@@ -51,8 +52,9 @@ class Client:
         *,
         platform: Platform | None = None,
         device_path: str | None = None,
-        rate: float = 10.0,
-        capacity: float = 50.0,
+        rate: float | None = None,
+        capacity: float | None = None,
+        connect_retries: int | None = None,
         proxies: ProxyType | None = None,
         cert: TLSClientCertType | None = None,
         hooks: AsyncHookType[PreparedRequest | Response] | None = None,
@@ -66,6 +68,7 @@ class Client:
             device_path: 设备信息文件路径.
             rate: 请求速率限制 (请求/秒). 默认为 10.
             capacity: 令牌桶容量, 允许的突发请求数. 默认为 50.
+            connect_retries: 连接建立失败时的最大重试次数. 默认为 2.
             proxies: 代理配置, 详见 niquests 文档.
             cert: TLS 客户端证书配置, 详见 niquests 文档.
             verify: TLS 证书验证配置, 详见 niquests 文档.
@@ -73,8 +76,17 @@ class Client:
         """
         self._session = AsyncSession(
             multiplexed=True,
-            hooks=AsyncTokenBucketLimiter(rate=rate, capacity=capacity),
+            hooks=AsyncTokenBucketLimiter(rate=rate or 10, capacity=capacity or 50),
             happy_eyeballs=True,
+            retries=Retry(
+                total=connect_retries or 2,
+                connect=connect_retries or 2,
+                read=0,
+                redirect=0,
+                status=0,
+                other=0,
+                backoff_factor=0.2,
+            ),
         )
         self.credential = credential or Credential()
         self.platform = platform or Platform.ANDROID
