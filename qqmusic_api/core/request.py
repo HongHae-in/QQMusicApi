@@ -5,14 +5,14 @@ from collections.abc import Generator
 from dataclasses import dataclass
 from dataclasses import replace as dc_replace
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar
 
 from pydantic import BaseModel
 from tarsio import TarsDict
 from typing_extensions import overload
 
 from ..models.request import Credential
-from .pagination import PagerMeta, RefreshMeta, ResponsePager, ResponseRefresher
+from .pagination import PagerMeta, RefreshMeta, RequestResultT, ResponsePager, ResponseRefresher
 from .versioning import Platform
 
 if TYPE_CHECKING:
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 
 ResponseModel = TypeVar("ResponseModel", bound=BaseModel)
-RequestResultT = TypeVar("RequestResultT", bound=BaseModel | dict[str, Any] | TarsDict)
+AllowErrorCodes = Literal["all"] | set[int] | frozenset[int] | tuple[int, ...]
 
 
 @overload
@@ -78,6 +78,7 @@ class Request(Generic[RequestResultT]):
     preserve_bool: bool = False
     credential: Credential | None = None
     platform: Platform | None = None
+    allow_error_codes: AllowErrorCodes | None = None
 
     def __await__(self) -> Generator[Any, Any, RequestResultT]:
         """使 Request 对象可被 await 执行."""

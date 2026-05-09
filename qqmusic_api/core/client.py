@@ -14,7 +14,14 @@ from ..models.request import Credential, JceRequest, JceRequestItem, JceResponse
 from ..utils.common import bool_to_int
 from ..utils.device import DeviceManager
 from ..utils.qimei import QimeiManager
-from .exceptions import ApiDataError, HTTPError, LoginExpiredError, RatelimitedError
+from .exceptions import (
+    ApiDataError,
+    CgiApiException,
+    CredentialExpiredError,
+    GlobalApiError,
+    HTTPError,
+    RatelimitedError,
+)
 from .request import Request, RequestResultT, _build_result
 from .versioning import DEFAULT_VERSION_POLICY, Platform, VersionPolicy
 
@@ -453,7 +460,7 @@ class Client:
         """验证响应的基本有效性."""
         if response.status_code != 200:
             raise HTTPError(
-                f"HTTP请求失败: {response.status_code}",
+                f"HTTP 请求状态码异常: {response.status_code}",
                 status_code=cast("int", response.status_code),
             )
         if not response.content:
@@ -465,7 +472,7 @@ class Client:
         code: int = resp.code if is_jce else cast("dict", resp).pop("code", 0)
 
         if code != 0:
-            raise ApiDataError(f"API响应错误, code={code}, content={response.content!r}", data=response.text)
+            raise GlobalApiError("Module 请求失败", code=code, data=response.text)
 
         return resp.data if is_jce else cast("Any", resp)
 
@@ -479,16 +486,24 @@ class Client:
             code = item.code
             data = item.data
         else:
-            code = item.get("code", 0)
+            code: int = item.get("code", 0)
             data = item.get("data", {})
+
+        if request.allow_error_codes and (
+            code == 0 or (request.allow_error_codes == "all" or code in request.allow_error_codes)
+        ):
+            return cast(
+                "RequestResultT",
+                {"code": code, "data": data} if request.is_jce else item,
+            )
 
         match code:
             case 2001:
-                raise RatelimitedError()
+                raise RatelimitedError(code=code, data=data)
             case 1000 | 104401 | 104400:
-                raise LoginExpiredError()
+                raise CredentialExpiredError(code=code, data=data)
             case int() if code != 0:
-                raise ApiDataError(f"API响应错误, code={code}, content={data!r}")
+                raise CgiApiException(code=code, data=data)
 
         return cast("RequestResultT", _build_result(data, request.response_model))
 
