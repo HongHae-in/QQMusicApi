@@ -1,4 +1,29 @@
 
+## [[0.6.0](https://github.com/L-1124/QQMusicApi/compare/v0.5.3..v0.6.0)] - 2026-05-09
+
+### Bug 修复
+
+* **(login)** 修改手机验证码鉴权参数类型为字符串 ([5cfebc6](https://github.com/L-1124/QQMusicApi/commit/5cfebc67cc816e0ca1930f76386fc599215496af)) by [@L-1124](https://github.com/L-1124)
+
+### 功能更新
+
+* **(client)** 添加连接重试机制参数 ([38134a7](https://github.com/L-1124/QQMusicApi/commit/38134a74cfe9d3b623c46d74136687d9a2731848)) by [@L-1124](https://github.com/L-1124)
+* **(core)** [**breaking**] 移除 `RequestGroup`，支持 `Client.gather` 批量并发请求，重构请求速率限制参数 ([632b6a8](https://github.com/L-1124/QQMusicApi/commit/632b6a85fe509bbbab7bbe6e7ae702e34ef49440)) by [@L-1124](https://github.com/L-1124)
+* **(web)** 添加 Docker 支持 ([b6f4dfc](https://github.com/L-1124/QQMusicApi/commit/b6f4dfc824c45cdba784904fd937495ab15065cc)) by [@L-1124](https://github.com/L-1124)
+* **(web)** 添加 Web 服务路由 ([154d714](https://github.com/L-1124/QQMusicApi/commit/154d714f4bd918ab6b23814f841b154e5b388c94)) by [@L-1124](https://github.com/L-1124) in [#247](https://github.com/L-1124/QQMusicApi/pull/247)
+* [**breaking**] 不再支持配置 `Client` 部分参数并且修改并且初始化参数名 ([c4a7001](https://github.com/L-1124/QQMusicApi/commit/c4a7001a007128eba76b89004504b58be60c6f84)) by [@L-1124](https://github.com/L-1124)
+
+### 功能重构
+
+* **(algorithms)** [**breaking**] 移除 Web 端请求签名模块 ([21b3179](https://github.com/L-1124/QQMusicApi/commit/21b31794d89efebbf58505a4310dc95ecd9ba7f0)) by [@L-1124](https://github.com/L-1124)
+* **(core)** 重构 API 客户端, 迁移 httpx → niquests ([fc4f1b7](https://github.com/L-1124/QQMusicApi/commit/fc4f1b77f2f001331f38a178a2a16e84279a4549)) by [@L-1124](https://github.com/L-1124)
+* **(exception)** [**breaking**] 重构异常体系 ([3f7ef32](https://github.com/L-1124/QQMusicApi/commit/3f7ef3239f90cbcf3bf8ba64ab1561e89683df52)) by [@L-1124](https://github.com/L-1124)
+
+### 贡献者
+
+* @L-1124
+* @github-actions[bot]
+
 ## [[0.5.3](https://github.com/L-1124/QQMusicApi/compare/v0.5.2..v0.5.3)] - 2026-05-01
 
 ### Bug 修复
