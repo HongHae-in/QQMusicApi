@@ -178,6 +178,7 @@ class Settings(BaseSettings):
         env_prefix="QQMUSIC_",
         env_file=".env",
         toml_file="web/config.toml",
+        env_nested_delimiter="_",
         extra="ignore",
     )
 

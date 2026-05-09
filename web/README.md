@@ -23,6 +23,32 @@ uv run web/run.py
 
 服务启动后，访问 [http://localhost:8080/docs](http://localhost:8080/docs) 查看自动生成的 API 文档。
 
+### Docker 部署
+
+```bash
+# 构建镜像
+docker build -t qqmusic-api-web -f web/Dockerfile .
+
+# 运行容器
+docker run -p 8080:8080 \
+  -v ./web/data:/app/web/data \
+  qqmusic-api-web
+```
+
+使用 docker-compose:
+
+```bash
+docker compose -f web/docker-compose.yml up -d
+```
+
+挂载说明:
+
+* `web/data/` — 设备信息、凭据状态库、日志等持久化数据。
+* `web/accounts.toml` — 可选，自定义全局凭据账号。
+* `web/config.toml` — 可选，自定义 Web 配置。
+
+配置通过环境变量覆盖，前缀 `QQMUSIC_`，嵌套字段用 `_` 分隔，例如 `QQMUSIC_SERVER_HOST=0.0.0.0`。
+
 ## 代码结构
 
 * `web/src/app.py`: FastAPI 应用入口。
