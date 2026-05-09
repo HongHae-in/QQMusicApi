@@ -197,10 +197,13 @@ class SongApi(ApiModule):
             "ctx": 0,
             "client": 1,
         }
-        if isinstance(value[0], int):
-            params["ids"] = value
+        numeric_values = [isinstance(item, int) or (isinstance(item, str) and item.isdecimal()) for item in value]
+        if all(numeric_values):
+            params["ids"] = [int(v) for v in value]
+        elif any(numeric_values):
+            raise ValueError("value 不能混合歌曲 ID 与 MID")
         else:
-            params["mids"] = value
+            params["mids"] = [str(v) for v in value]
         return self._build_request(
             module="music.trackInfo.UniformRuleCtrl",
             method="CgiGetTrackInfo",
@@ -271,13 +274,17 @@ class SongApi(ApiModule):
             credential=credential,
         )
 
-    def get_detail(self, value: str | int):
+    def get_detail(self, value: int | str):
         """获取歌曲详细信息.
 
         Args:
             value: 歌曲 ID 或 MID.
         """
-        param = {"song_id": value} if isinstance(value, int) else {"song_mid": value}
+        param = (
+            {"song_id": int(value)}
+            if isinstance(value, int) or (isinstance(value, str) and value.isdecimal())
+            else {"song_mid": value}
+        )
         return self._build_request(
             module="music.pf_song_detail_svr",
             method="get_song_detail_yqq",
@@ -356,13 +363,17 @@ class SongApi(ApiModule):
             ),
         )
 
-    def get_other_version(self, value: str | int):
+    def get_other_version(self, value: int | str):
         """获取歌曲其他版本.
 
         Args:
             value: 歌曲 ID 或 MID.
         """
-        param = {"songid": value} if isinstance(value, int) else {"songmid": value}
+        param = (
+            {"songid": int(value)}
+            if isinstance(value, int) or (isinstance(value, str) and value.isdecimal())
+            else {"songmid": value}
+        )
         return self._build_request(
             module="music.musichallSong.OtherVersionServer",
             method="GetOtherVersionSongs",
@@ -370,13 +381,17 @@ class SongApi(ApiModule):
             response_model=GetOtherVersionResponse,
         )
 
-    def get_producer(self, value: str | int):
+    def get_producer(self, value: int | str):
         """获取歌曲制作人信息.
 
         Args:
             value: 歌曲 ID 或 MID.
         """
-        param = {"songid": value} if isinstance(value, int) else {"songmid": value}
+        param = (
+            {"songid": int(value)}
+            if isinstance(value, int) or (isinstance(value, str) and value.isdecimal())
+            else {"songmid": value}
+        )
         return self._build_request(
             module="music.sociality.KolWorksTag",
             method="SongProducer",
