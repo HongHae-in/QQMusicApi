@@ -279,7 +279,7 @@ class Client:
         """发送 API 请求."""
         platform = Platform.ANDROID if is_jce else platform or self.platform
         finalcomm = self._version_policy.build_comm(
-            platform=platform,
+            platform=platform or self.platform,
             credential=credential or self.credential,
             device=await self._device_store.get_device(),
             qimei=cast("dict[str, str]", await self._qimei_manager.get_cached())

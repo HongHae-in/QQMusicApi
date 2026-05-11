@@ -48,6 +48,7 @@ class CommentApi(ApiModule):
         Args:
             biz_id: 歌曲 ID.
         """
+        # 支持 request_list
         data = {
             "request": {
                 "biz_id": str(biz_id),
