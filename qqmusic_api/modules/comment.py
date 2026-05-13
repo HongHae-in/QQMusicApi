@@ -9,7 +9,9 @@ from ..core.pagination import (
     PaginationParams,
     ResponseAdapter,
 )
-from ..models.comment import CommentCountResponse, CommentListResponse, MomentCommentResponse
+from ..core.versioning import Platform
+from ..models.comment import AddCommentResponse, CommentCountResponse, CommentListResponse, MomentCommentResponse
+from ..models.request import Credential
 from ._base import ApiModule
 
 
@@ -195,3 +197,59 @@ class CommentApi(ApiModule):
                 adapter=ResponseAdapter(has_more_flag="has_more", cursor="next_pos"),
             ),
         )
+
+    def add_comment(
+        self,
+        biz_id: int,
+        content: str,
+        reply_cmt_id: str | None = None,
+        credential: Credential | None = None,
+    ):
+        """添加评论.
+
+        Args:
+            biz_id: 歌曲 ID.
+            content: 评论内容.
+            reply_cmt_id: 回复的评论 ID.
+            credential: 登录凭据.
+        """
+        self._require_login(credential)
+        return self._build_request(
+            "music.globalComment.CommentWriteServer",
+            "AddComment",
+            {
+                "Content": content,
+                "BizType": 1,
+                "BizId": str(biz_id),
+                "RepliedCmId": reply_cmt_id,
+            },
+            credential=credential,
+            platform=Platform.ANDROID,
+            response_model=AddCommentResponse,
+        )
+
+    async def delete_comment(
+        self,
+        cm_id: str,
+        credential: Credential | None = None,
+    ) -> bool:
+        """删除评论.
+
+        Args:
+            cm_id: 评论 ID.
+            credential: 登录凭据.
+
+        Returns:
+            是否删除成功,评论不存在也为 True.
+        """
+        self._require_login(credential)
+        data = await self._build_request(
+            "music.globalComment.CommentWriteServer",
+            "DelComment",
+            {
+                "CommentId": cm_id,
+            },
+            platform=Platform.ANDROID,
+            credential=credential,
+        )
+        return data.get("SubCode", 0) == 0

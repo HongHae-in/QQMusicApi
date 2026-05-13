@@ -203,3 +203,23 @@ class MomentCommentResponse(Response):
     hint: str = Field(alias="Hint")
     prev_list_loaded: int = Field(alias="PrevListLoaded")
     map_cm_ext: dict[str, dict[str, Any]] = Field(default_factory=dict, alias="MapCmExt")
+
+
+class AddCommentResponse(Response):
+    """添加评论接口的响应体.
+
+    Attributes:
+        subcode: 响应子代码.
+        msg: 响应消息.
+        id: 新增评论 ID.
+        parent: 父评论 ID.
+        floor: 楼层号.
+        verify_url: 验证码 URL (如果需要).
+    """
+
+    subcode: int = Field(alias="SubCode")
+    msg: str = Field(alias="Msg")
+    id: str = Field(alias="AddedCmId")
+    parent: str = Field(alias="ParentCmId")
+    floor: int = Field(json_schema_extra={"jsonpath": "$.Floor.Num"})
+    verify_url: str = Field(alias="VerifyUrl")
