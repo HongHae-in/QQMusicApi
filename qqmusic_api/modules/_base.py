@@ -6,8 +6,6 @@ from ..core.exceptions import CredentialInvalidError
 from ..core.versioning import Platform
 
 if TYPE_CHECKING:
-    from tarsio import TarsDict
-
     from ..core.client import Client
     from ..core.pagination import PagerMeta, RefreshMeta
     from ..core.request import AllowErrorCodes, PaginatedRequest, RefreshableRequest, Request, ResponseModel
@@ -85,7 +83,6 @@ class ApiModule:
         comm: dict[str, Any] | None = None,
         *,
         override_comm: bool = False,
-        is_jce: bool = False,
         preserve_bool: bool = False,
         credential: "Credential | None" = None,
         platform: Platform | None = None,
@@ -107,7 +104,6 @@ class ApiModule:
         comm: dict[str, Any] | None = None,
         *,
         override_comm: bool = False,
-        is_jce: bool = False,
         preserve_bool: bool = False,
         credential: "Credential | None" = None,
         platform: Platform | None = None,
@@ -129,7 +125,6 @@ class ApiModule:
         comm: dict[str, Any] | None = None,
         *,
         override_comm: bool = False,
-        is_jce: bool = False,
         preserve_bool: bool = False,
         credential: "Credential | None" = None,
         platform: Platform | None = None,
@@ -147,77 +142,10 @@ class ApiModule:
         module: str,
         method: str,
         param: dict[str, Any] | dict[int, Any],
-        response_model: None = None,
-        comm: dict[str, Any] | None = None,
-        *,
-        override_comm: bool = False,
-        is_jce: bool = True,
-        preserve_bool: bool = False,
-        credential: "Credential | None" = None,
-        platform: Platform | None = None,
-        allow_error_codes: "AllowErrorCodes | None" = None,
-        parse_on_allow: bool = False,
-        pager_meta: None = None,
-        refresh_meta: None = None,
-        sign: bool = False,
-        require_login: bool = False,
-    ) -> "Request[TarsDict]": ...
-
-    @overload
-    def _build_request(
-        self,
-        module: str,
-        method: str,
-        param: dict[str, Any] | dict[int, Any],
-        response_model: None = None,
-        comm: dict[str, Any] | None = None,
-        *,
-        override_comm: bool = False,
-        is_jce: bool = True,
-        preserve_bool: bool = False,
-        credential: "Credential | None" = None,
-        platform: Platform | None = None,
-        allow_error_codes: "AllowErrorCodes | None" = None,
-        parse_on_allow: bool = False,
-        pager_meta: "PagerMeta",
-        refresh_meta: None = None,
-        sign: bool = False,
-        require_login: bool = False,
-    ) -> "PaginatedRequest[TarsDict]": ...
-
-    @overload
-    def _build_request(
-        self,
-        module: str,
-        method: str,
-        param: dict[str, Any] | dict[int, Any],
-        response_model: None = None,
-        comm: dict[str, Any] | None = None,
-        *,
-        override_comm: bool = False,
-        is_jce: bool = True,
-        preserve_bool: bool = False,
-        credential: "Credential | None" = None,
-        platform: Platform | None = None,
-        allow_error_codes: "AllowErrorCodes | None" = None,
-        parse_on_allow: bool = False,
-        pager_meta: None = None,
-        refresh_meta: "RefreshMeta",
-        sign: bool = False,
-        require_login: bool = False,
-    ) -> "RefreshableRequest[TarsDict]": ...
-
-    @overload
-    def _build_request(
-        self,
-        module: str,
-        method: str,
-        param: dict[str, Any] | dict[int, Any],
         response_model: type["ResponseModel"],
         comm: dict[str, Any] | None = None,
         *,
         override_comm: bool = False,
-        is_jce: bool = False,
         preserve_bool: bool = False,
         credential: "Credential | None" = None,
         platform: Platform | None = None,
@@ -239,7 +167,6 @@ class ApiModule:
         comm: dict[str, Any] | None = None,
         *,
         override_comm: bool = False,
-        is_jce: bool = False,
         preserve_bool: bool = False,
         credential: "Credential | None" = None,
         platform: Platform | None = None,
@@ -261,7 +188,6 @@ class ApiModule:
         comm: dict[str, Any] | None = None,
         *,
         override_comm: bool = False,
-        is_jce: bool = False,
         preserve_bool: bool = False,
         credential: "Credential | None" = None,
         platform: Platform | None = None,
@@ -282,7 +208,6 @@ class ApiModule:
         comm: dict[str, Any] | None = None,
         *,
         override_comm: bool = False,
-        is_jce: bool = False,
         preserve_bool: bool = False,
         credential: "Credential | None" = None,
         platform: Platform | None = None,
@@ -302,7 +227,6 @@ class ApiModule:
             response_model: 用于解析响应数据的 Pydantic 模型.
             comm: 附加的通用请求参数. 行为受 `override_comm` 影响.
             override_comm: 为 True 时, `comm` 将彻底替代自动生成的参数; 为 False 时, 将与生成参数进行合并更新.
-            is_jce: 是否作为 JCE (Tars) 请求发送.
             preserve_bool: 是否保留布尔值原样 (默认转为 0/1 整型).
             credential: 本次请求专用的凭证. 默认使用客户端当前凭证.
             platform: 本次请求的平台标识. 默认使用客户端所属平台.
@@ -336,7 +260,6 @@ class ApiModule:
             "response_model": response_model,
             "comm": comm,
             "override_comm": override_comm,
-            "is_jce": is_jce,
             "preserve_bool": preserve_bool,
             "credential": credential,
             "platform": platform,

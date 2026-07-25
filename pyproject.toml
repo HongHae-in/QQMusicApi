@@ -39,7 +39,6 @@ dependencies = [
   "orjson>=3.10.15",
   "paho-mqtt>=2.1.0",
   "pydantic>=2.13.3",
-  "tarsio>=0.5.1",
   "typing-extensions>=4.12.2",
 ]
 dynamic = ["version"]
@@ -56,7 +55,6 @@ upload = [
 
 [dependency-groups]
 dev = [
-  "tarsio[cli]>=0.5.1",
   "terminal-qrcode>=1.1.0",
   { include-group = "docs" },
   { include-group = "linting" },

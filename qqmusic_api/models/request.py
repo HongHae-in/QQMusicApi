@@ -4,7 +4,6 @@ from typing import Any, TypedDict
 
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, Field, model_validator
-from tarsio import Struct, TarsDict, field
 
 
 class BaseModel(PydanticBaseModel):
@@ -126,35 +125,6 @@ class RequestItem(TypedDict):
     method: str
     param: dict[str, Any] | dict[int, Any]
     preserve_bool: bool
-
-
-class JceRequestItem(Struct):
-    """JCE 请求项."""
-
-    module: str = field(tag=0)
-    method: str = field(tag=1)
-    param: TarsDict = field(tag=2, wrap_simplelist=True)
-
-
-class JceRequest(Struct):
-    """JCE 请求体."""
-
-    comm: dict[str, str] = field(tag=0)
-    data: dict[str, JceRequestItem] = field(tag=1)
-
-
-class JceResponseItem(Struct):
-    """JCE 格式响应项."""
-
-    code: int = field(tag=0, default=0)
-    data: TarsDict = field(tag=3, default_factory=TarsDict, wrap_simplelist=True)
-
-
-class JceResponse(Struct):
-    """JCE 格式 API 响应."""
-
-    code: int = field(tag=0, default=0)
-    data: dict[str, JceResponseItem] = field(tag=4, default_factory=dict)
 
 
 class Response(BaseModel):

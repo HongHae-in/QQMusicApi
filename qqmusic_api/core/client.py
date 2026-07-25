@@ -11,10 +11,9 @@ from niquests import AsyncSession, AsyncTokenBucketLimiter, PreparedRequest, Ret
 from niquests.exceptions import RequestException
 from niquests.models import Response
 from niquests.typing import AsyncHookType, ProxyType, TLSClientCertType, TLSVerifyType
-from tarsio import TarsDict
 
 from ..algorithms import zzc_sign
-from ..models.request import Credential, JceRequest, JceRequestItem, JceResponse, JceResponseItem, RequestItem
+from ..models.request import Credential, RequestItem
 from ..utils.common import bool_to_int
 from ..utils.device import Device, DeviceManager
 from ..utils.qimei import QimeiManager
@@ -365,12 +364,11 @@ class Client:
         platform: Platform | None = None,
         *,
         override_comm: bool = False,
-        is_jce: bool = False,
         lazy: bool = False,
         sign: bool = False,
     ) -> Response:
         """发送 API 请求."""
-        target_platform = Platform.ANDROID if is_jce else platform or self.platform
+        target_platform = platform or self.platform
         if target_platform == Platform.ANDROID:
             await self._ensure_session()
         device = await self._device_store.get_device()
@@ -392,34 +390,6 @@ class Client:
         user_agent = await self._get_user_agent(target_platform)
 
         try:
-            if is_jce:
-                for k, v in finalcomm.items():
-                    if not isinstance(v, str):
-                        finalcomm[k] = str(v)
-                content = JceRequest(
-                    finalcomm,
-                    {
-                        f"req_{idx}": JceRequestItem(
-                            module=req["module"],
-                            method=req["method"],
-                            param=TarsDict(cast("dict[int, Any]", req["param"])),
-                        )
-                        for idx, req in enumerate(data)
-                    },
-                ).encode()
-                resp = await self._session.post(
-                    "http://u.y.qq.com/cgi-bin/musicw.fcg",
-                    data=content,
-                    headers={"User-Agent": user_agent},
-                    proxies=self.proxies,
-                    hooks=self.hooks,
-                    cert=self.cert,
-                    verify=self.verify,
-                )
-                if not lazy:
-                    await self._session.gather(resp)
-                return resp
-
             payload: dict[str, Any] = {
                 "comm": finalcomm,
             }
@@ -545,7 +515,6 @@ class Client:
                     override_comm=base_req.override_comm,
                     credential=base_req.credential,
                     platform=base_req.platform,
-                    is_jce=base_req.is_jce,
                     lazy=True,
                     sign=base_req.sign,
                 )
@@ -559,7 +528,7 @@ class Client:
         results: list[Any] = [_SENTINEL] * len(requests)
 
         for batch_indices, response in batch_responses:
-            data = self._vaildate_resp(response, is_jce=requests[batch_indices[0]].is_jce)
+            data = self._vaildate_resp(response)
             for batch_index, req_index in enumerate(batch_indices):
                 request = requests[req_index]
                 try:
@@ -579,7 +548,7 @@ class Client:
 
         return results
 
-    def _vaildate_resp(self, response: Response, *, is_jce: bool) -> dict[str, Any]:
+    def _vaildate_resp(self, response: Response) -> dict[str, Any]:
         """验证响应的基本有效性."""
         if response.status_code != 200:
             raise HTTPError(
@@ -589,38 +558,31 @@ class Client:
         if not response.content:
             raise ApiDataError("响应无内容")
         try:
-            resp = JceResponse.decode(response.content) if is_jce else response.json()
+            resp = response.json()
         except Exception as exc:
-            raise ApiDataError("响应内容非有效 JCE 格式") from exc
-        code: int = resp.code if is_jce else cast("dict", resp).pop("code", 0)
+            raise ApiDataError("响应内容非有效 JSON 格式") from exc
+        code: int = cast("dict", resp).pop("code", 0)
 
         if code != 0:
             raise GlobalApiError("Module 请求失败", code=code, data=response.text)
 
-        return resp.data if is_jce else cast("Any", resp)
+        return cast("Any", resp)
 
     def _parse_cgi_item(
         self,
-        item: dict[str, Any] | JceResponseItem,
+        item: dict[str, Any],
         request: Request[RequestResultT],
     ) -> RequestResultT:
         """解析单个 CGI 响应项."""
-        if isinstance(item, JceResponseItem):
-            code = item.code
-            data = item.data
-        else:
-            code: int = item.get("code", 0)
-            data = item.get("data", {})
+        code: int = item.get("code", 0)
+        data = item.get("data", {})
 
         if request.allow_error_codes and (
             code == 0 or (request.allow_error_codes == "all" or code in request.allow_error_codes)
         ):
             if request.parse_on_allow:
                 return cast("RequestResultT", _build_result(data, request.response_model))
-            return cast(
-                "RequestResultT",
-                {"code": code, "data": data} if request.is_jce else item,
-            )
+            return cast("RequestResultT", item)
         match code:
             case 2000:
                 raise SignatureRequiredError(code=code, data=data)
@@ -658,7 +620,6 @@ class Client:
             override_comm=request.override_comm,
             credential=request.credential,
             platform=request.platform,
-            is_jce=request.is_jce,
             sign=request.sign,
         )
-        return self._parse_cgi_item(self._vaildate_resp(resp, is_jce=request.is_jce)["req_0"], request)
+        return self._parse_cgi_item(self._vaildate_resp(resp)["req_0"], request)

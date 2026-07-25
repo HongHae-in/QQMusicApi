@@ -8,7 +8,6 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar
 
 from pydantic import BaseModel
-from tarsio import TarsDict
 from typing_extensions import overload
 
 from ..models.request import Credential
@@ -25,7 +24,7 @@ AllowErrorCodes = Literal["all"] | set[int] | frozenset[int] | tuple[int, ...]
 
 @overload
 def _build_result(
-    raw: TarsDict | dict[str, Any],
+    raw: dict[str, Any],
     response_model: type["ResponseModel"],
 ) -> "ResponseModel": ...
 
@@ -37,17 +36,10 @@ def _build_result(
 ) -> dict[str, Any]: ...
 
 
-@overload
 def _build_result(
-    raw: TarsDict,
-    response_model: None,
-) -> TarsDict: ...
-
-
-def _build_result(
-    raw: TarsDict | dict[str, Any],
+    raw: dict[str, Any],
     response_model: type[BaseModel] | None,
-) -> BaseModel | dict[str, Any] | TarsDict:
+) -> BaseModel | dict[str, Any]:
     """构建响应对象.
 
     Args:
@@ -75,7 +67,6 @@ class Request(Generic[RequestResultT]):
     response_model: type[BaseModel] | None = None
     comm: dict[str, int | str | bool] | None = None
     override_comm: bool = False
-    is_jce: bool = False
     preserve_bool: bool = False
     credential: Credential | None = None
     platform: Platform | None = None
@@ -91,7 +82,6 @@ class Request(Generic[RequestResultT]):
     def _group_key(
         self,
     ) -> tuple[
-        bool,
         Platform | None,
         tuple[tuple[str, int | str | bool], ...] | None,
         bool,
@@ -103,7 +93,7 @@ class Request(Generic[RequestResultT]):
         credential = self.credential or self._client.credential
         credential_key = (credential.musicid, credential.musickey)
         comm_items = tuple(sorted(self.comm.items(), key=lambda item: item[0])) if self.comm is not None else None
-        return (self.is_jce, platform, comm_items, self.override_comm, credential_key, self.sign)
+        return (platform, comm_items, self.override_comm, credential_key, self.sign)
 
     def replace(self, **changes: Any) -> "Request[RequestResultT]":
         """返回一个应用了修改的新 Request 对象, 不会修改原对象."""

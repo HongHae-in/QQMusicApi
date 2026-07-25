@@ -7,12 +7,11 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Generic, TypeAlias, TypeVar, cast
 
 from pydantic import BaseModel
-from tarsio import TarsDict
 
 if TYPE_CHECKING:
     from .request import PaginatedRequest, RefreshableRequest
 
-RequestResultT = TypeVar("RequestResultT", bound=BaseModel | dict[str, Any] | TarsDict)
+RequestResultT = TypeVar("RequestResultT", bound=BaseModel | dict[str, Any])
 PaginationParams: TypeAlias = dict[str, Any] | dict[int, Any]
 NextParamsBuilder: TypeAlias = Callable[[PaginationParams, Any, "ResponseAdapter"], PaginationParams | None]
 

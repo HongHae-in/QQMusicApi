@@ -455,7 +455,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -698,18 +698,6 @@ wheels = [
 ]
 
 [[package]]
-name = "markdown-it-py"
-version = "4.2.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "mdurl" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/06/ff/7841249c247aa650a76b9ee4bbaeae59370dc8bfd2f6c01f3630c35eb134/markdown_it_py-4.2.0.tar.gz", hash = "sha256:04a21681d6fbb623de53f6f364d352309d4094dd4194040a10fd51833e418d49", size = 82454, upload-time = "2026-05-07T12:08:28.36Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b3/81/4da04ced5a082363ecfa159c010d200ecbd959ae410c10c0264a38cac0f5/markdown_it_py-4.2.0-py3-none-any.whl", hash = "sha256:9f7ebbcd14fe59494226453aed97c1070d83f8d24b6fc3a3bcf9a38092641c4a", size = 91687, upload-time = "2026-05-07T12:08:27.182Z" },
-]
-
-[[package]]
 name = "markupsafe"
 version = "3.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -792,15 +780,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/fb/df/5bd7a48c256faecd1d36edc13133e51397e41b73bb77e1a69deab746ebac/markupsafe-3.0.3-cp314-cp314t-win32.whl", hash = "sha256:915c04ba3851909ce68ccc2b8e2cd691618c4dc4c4232fb7982bca3f41fd8c3d", size = 14819, upload-time = "2025-09-27T18:37:26.285Z" },
     { url = "https://files.pythonhosted.org/packages/1a/8a/0402ba61a2f16038b48b39bccca271134be00c5c9f0f623208399333c448/markupsafe-3.0.3-cp314-cp314t-win_amd64.whl", hash = "sha256:4faffd047e07c38848ce017e8725090413cd80cbc23d86e55c587bf979e579c9", size = 15426, upload-time = "2025-09-27T18:37:27.316Z" },
     { url = "https://files.pythonhosted.org/packages/70/bc/6f1c2f612465f5fa89b95bead1f44dcb607670fd42891d8fdcd5d039f4f4/markupsafe-3.0.3-cp314-cp314t-win_arm64.whl", hash = "sha256:32001d6a8fc98c8cb5c947787c5d08b0a50663d139f1305bac5885d98d9b40fa", size = 14146, upload-time = "2025-09-27T18:37:28.327Z" },
-]
-
-[[package]]
-name = "mdurl"
-version = "0.1.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba", size = 8729, upload-time = "2022-08-14T12:40:10.846Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8", size = 9979, upload-time = "2022-08-14T12:40:09.779Z" },
 ]
 
 [[package]]
@@ -1537,7 +1516,6 @@ dependencies = [
     { name = "orjson" },
     { name = "paho-mqtt" },
     { name = "pydantic" },
-    { name = "tarsio" },
     { name = "typing-extensions" },
 ]
 
@@ -1560,7 +1538,6 @@ dev = [
     { name = "pytest-asyncio" },
     { name = "pytest-sugar" },
     { name = "ruff" },
-    { name = "tarsio", extra = ["cli"] },
     { name = "terminal-qrcode" },
     { name = "zensical" },
 ]
@@ -1603,7 +1580,6 @@ requires-dist = [
     { name = "orjson", specifier = ">=3.10.15" },
     { name = "paho-mqtt", specifier = ">=2.1.0" },
     { name = "pydantic", specifier = ">=2.13.3" },
-    { name = "tarsio", specifier = ">=0.5.1" },
     { name = "typing-extensions", specifier = ">=4.12.2" },
 ]
 provides-extras = ["upload"]
@@ -1622,7 +1598,6 @@ dev = [
     { name = "pytest-asyncio", specifier = ">=1.3.0" },
     { name = "pytest-sugar", specifier = ">=1.1.1" },
     { name = "ruff", specifier = ">=0.15.6" },
-    { name = "tarsio", extras = ["cli"], specifier = ">=0.5.1" },
     { name = "terminal-qrcode", specifier = ">=1.1.0" },
     { name = "zensical", specifier = ">=0.0.30" },
 ]
@@ -1681,19 +1656,6 @@ wheels = [
 ]
 
 [[package]]
-name = "rich"
-version = "15.0.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "markdown-it-py" },
-    { name = "pygments" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/c0/8f/0722ca900cc807c13a6a0c696dacf35430f72e0ec571c4275d2371fca3e9/rich-15.0.0.tar.gz", hash = "sha256:edd07a4824c6b40189fb7ac9bc4c52536e9780fbbfbddf6f1e2502c31b068c36", size = 230680, upload-time = "2026-04-12T08:24:00.75Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/82/3b/64d4899d73f91ba49a8c18a8ff3f0ea8f1c1d75481760df8c68ef5235bf5/rich-15.0.0-py3-none-any.whl", hash = "sha256:33bd4ef74232fb73fe9279a257718407f169c09b78a87ad3d296f548e27de0bb", size = 310654, upload-time = "2026-04-12T08:24:02.83Z" },
-]
-
-[[package]]
 name = "ruff"
 version = "0.15.16"
 source = { registry = "https://pypi.org/simple" }
@@ -1738,68 +1700,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/25/44/ec35f1b6e83094b997da438a02c8c9b0ade2b1e84cfc48bd4656780760a6/starlette-1.2.1.tar.gz", hash = "sha256:9b9b5ebb992e67d6093741e63c2f59e4f6fff986f81163c087867bd7b924b3f6", size = 2701854, upload-time = "2026-05-31T01:07:51.847Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1c/54/196d0c1db10af76baa4f64894448505d60d3cdf70ef92cbb35f46a4e4c71/starlette-1.2.1-py3-none-any.whl", hash = "sha256:4de0082d08c8f6764a85a54cf1120d6939507a19905c7768acad2a9f875d2b89", size = 73350, upload-time = "2026-05-31T01:07:50.09Z" },
-]
-
-[[package]]
-name = "tarsio"
-version = "0.5.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/0f/03/4fc32abae993c3a1026df174d33cb0114538f08f10b4a4ac88f8de214e4c/tarsio-0.5.3.tar.gz", hash = "sha256:b7b0cff6ebc031e4ef5795c8e8dfe7752b53e091eb9563c6cf47df15ab7e4a36", size = 174118, upload-time = "2026-05-07T07:15:37.055Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/89/02/88e6dd214018d2f02bc3b90534737232038b1aa2c9d1d6547150a9345215/tarsio-0.5.3-cp310-cp310-macosx_10_12_x86_64.whl", hash = "sha256:499aa3ffc469c615ecfed8fba551f72d791095dc6461bb6c87be8511444733d7", size = 489559, upload-time = "2026-05-07T07:14:27.91Z" },
-    { url = "https://files.pythonhosted.org/packages/be/8e/aec290e6a6faeada40294bd279d1c06f48f9cda39be7159e7cb5b756ec00/tarsio-0.5.3-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:ca1c74c5cd2498b7700c08b7443cff7413a5878156d0344e8ed790264115b6e0", size = 454989, upload-time = "2026-05-07T07:14:29.76Z" },
-    { url = "https://files.pythonhosted.org/packages/f3/1f/c44be3a76e8600b4e4b4f0db9f3a624254e4252195357cd28801e5f370ba/tarsio-0.5.3-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:8d638d13c989e1ceda0f3f87a13336895437410a968d16f79b5dc4eecf77311e", size = 479812, upload-time = "2026-05-07T07:14:31.272Z" },
-    { url = "https://files.pythonhosted.org/packages/32/77/bf998d9a00a95357d3f90311c3ecc4d3148dcb67eee01667d063e63a8c78/tarsio-0.5.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d05be6cfaf03cd0194da38a10b1fd50f658f3401e50295e764b9603cbe14b15a", size = 496495, upload-time = "2026-05-07T07:14:32.986Z" },
-    { url = "https://files.pythonhosted.org/packages/af/4a/a28aee23318d2e73d65a5e7cf22f4f9e3a000ebb849dc4dcdd7d2b772770/tarsio-0.5.3-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:8259b5bf4d93254d1d56781c28f4974f5eca4fcce36bd90a673189080b591006", size = 520510, upload-time = "2026-05-07T07:14:34.919Z" },
-    { url = "https://files.pythonhosted.org/packages/c7/a7/f0770d730713c1a6a24b92586235fb002195d7ff22adc286848aa28cc749/tarsio-0.5.3-cp310-cp310-musllinux_1_1_aarch64.whl", hash = "sha256:032ac1400d1f54b9a576001b53d721fd9d8f9c11fe899982b84806247356abd1", size = 656731, upload-time = "2026-05-07T07:14:36.396Z" },
-    { url = "https://files.pythonhosted.org/packages/7e/89/c412509bc17ce40db18d495e42ee28bdb5255e0794aafd8cb9c1c2797112/tarsio-0.5.3-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:40fad8ea73d1e59bb80076e693adc47c77b33fc4260f51f3c6be8f1f03aeeaa7", size = 710068, upload-time = "2026-05-07T07:14:37.75Z" },
-    { url = "https://files.pythonhosted.org/packages/04/24/e594993596ddcf20bc0bd715f9326383868330e8702796c48daf174788b6/tarsio-0.5.3-cp310-cp310-win32.whl", hash = "sha256:40aa88be2c96c5cb47b7653e11f22aee5ea9946ea8f48cdd77a9ff0db3ad45fd", size = 386271, upload-time = "2026-05-07T07:14:39.527Z" },
-    { url = "https://files.pythonhosted.org/packages/27/82/d5446e3c966477eca1303ed5781926ba48cccbc7b55dad7f2229f7afb310/tarsio-0.5.3-cp310-cp310-win_amd64.whl", hash = "sha256:2e697fd8f15d6cb993fac5785bb7db532c09b6be088500ee141a47bac2c74045", size = 393488, upload-time = "2026-05-07T07:14:41.064Z" },
-    { url = "https://files.pythonhosted.org/packages/bf/bc/9d0dcbcbe94afdb30fa7f401468e5bc209410a3b0bdcfea234666dec7cd5/tarsio-0.5.3-cp311-cp311-macosx_10_12_x86_64.whl", hash = "sha256:5723c2d0f6138b774436a94df307f21edeb8ed4a05bc3d56903154e881380bef", size = 489218, upload-time = "2026-05-07T07:14:42.663Z" },
-    { url = "https://files.pythonhosted.org/packages/4a/7d/7d94c439a6edced3c256d6b4c1be74de5e1774afa28648640043905e1969/tarsio-0.5.3-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:46a36453f0352c5e6e82031a103a451da456514ecdabea87414ebcde9d2c9c26", size = 454638, upload-time = "2026-05-07T07:14:44.334Z" },
-    { url = "https://files.pythonhosted.org/packages/ee/8f/06dbe1e5352d09072044ce7e1cd749df650180fd5c11b826dbc99f0cba6b/tarsio-0.5.3-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:cd7226dbedf5bee45a7d3ba212392fec979b0cbfa8c316b48373bbc1caa85a7c", size = 479305, upload-time = "2026-05-07T07:14:45.888Z" },
-    { url = "https://files.pythonhosted.org/packages/a2/67/3e81405ad6dd4d3501216be8df5ac240dc488a6728a55be66552398f1d11/tarsio-0.5.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:896daf5bce983fe8ae815a96a1dda5c31408ac1b7755a4d3949b5f9c48d08662", size = 496220, upload-time = "2026-05-07T07:14:47.195Z" },
-    { url = "https://files.pythonhosted.org/packages/07/94/9bf15b753531d2414fedee7f3d27d9b7bc55c40e3d30c16b7843680fb6dd/tarsio-0.5.3-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:ec66744b304f29630b2fb4c58ec8af4148720e90580e207e281fe4d125ef20ff", size = 520065, upload-time = "2026-05-07T07:14:48.62Z" },
-    { url = "https://files.pythonhosted.org/packages/c9/d7/9c344efe3adcb53ac9df9dfca1d06f84ce123c7b342a0a2ffef15074513a/tarsio-0.5.3-cp311-cp311-musllinux_1_1_aarch64.whl", hash = "sha256:8dd3f2adb7901395b6f1451c3c9ef954ff811560e2cc00b2c610ac484814a37a", size = 656200, upload-time = "2026-05-07T07:14:50.165Z" },
-    { url = "https://files.pythonhosted.org/packages/2b/e5/40a0d3ed0ba462090df10340f7aba17a2e1591900f98647e39886c7e7956/tarsio-0.5.3-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:6372b6d410a28ecac83c8d71be863c5a4aff0c5f9eb8da044ca5f7158176efa3", size = 709831, upload-time = "2026-05-07T07:14:51.56Z" },
-    { url = "https://files.pythonhosted.org/packages/17/34/5a063eb9111d6114f347d9aa6ebe879a0c7fe59a7289f473d786e1f306c5/tarsio-0.5.3-cp311-cp311-win32.whl", hash = "sha256:3e01269af78aac92b700bde5d5ee29bd6e090e10ae27c53bd89926822e422a69", size = 386101, upload-time = "2026-05-07T07:14:52.918Z" },
-    { url = "https://files.pythonhosted.org/packages/60/39/316a461e133d16e30d01659571d5b74bb44bfc5b27ffdce2a9d5c1b0fb54/tarsio-0.5.3-cp311-cp311-win_amd64.whl", hash = "sha256:52677bf879ccacf50c163b9f677d75c14ba152bc868ae54b6dd788ffa06116da", size = 393215, upload-time = "2026-05-07T07:14:54.426Z" },
-    { url = "https://files.pythonhosted.org/packages/a2/18/87adf3937f17b124c5c2585e2dea7a466224820fe4aa393bcc33d91d2105/tarsio-0.5.3-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:33f351f1c73bcbe8cb40f45c25026e82ab1d6df4734091200320fee78f4b6cdd", size = 487090, upload-time = "2026-05-07T07:14:55.854Z" },
-    { url = "https://files.pythonhosted.org/packages/17/45/8a9591000d141eef303fbdb998cc22a0d4a71fc4aa450879a7eb5cd4dd5d/tarsio-0.5.3-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:19b67bc13d75f6da532f68b92ca9cb0f8021f64880c25f35e8c224d226d29afd", size = 453337, upload-time = "2026-05-07T07:14:57.152Z" },
-    { url = "https://files.pythonhosted.org/packages/85/65/788e3214b8db912ce0619f60441f3c17ceccef432a15ac8247f07777cf58/tarsio-0.5.3-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1fa8e678978bb143406ca321249a8490e2a1c85de57d196e81062a343e27bfb0", size = 477675, upload-time = "2026-05-07T07:14:58.461Z" },
-    { url = "https://files.pythonhosted.org/packages/22/57/8aece9ff75c250d4f37a621862aaf94a9f6c26df6c6ea9cbf6ec903b5a9c/tarsio-0.5.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b786592fa6ffa6fb1daa70658abe6c0072e4c87f0a9cd6e0fdc44c6510340749", size = 499282, upload-time = "2026-05-07T07:15:00.037Z" },
-    { url = "https://files.pythonhosted.org/packages/e0/71/b8447f99c3666e843d314fd7ca86c42c9cdb78145d4d6aab8683e3ca48b5/tarsio-0.5.3-cp312-cp312-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:41f3495fdb4de805dd5a398a1a8c05437d0c8b33084cbb3d80af9a71b3a7a593", size = 525332, upload-time = "2026-05-07T07:15:01.632Z" },
-    { url = "https://files.pythonhosted.org/packages/72/89/87cefba1f5fa46f86738980d98f9b397acc029ad51f1241874646da02ab7/tarsio-0.5.3-cp312-cp312-musllinux_1_1_aarch64.whl", hash = "sha256:69c5ed3f41a2c71e544e6fe27a8fa715a87ce91fdd655806300a7253cedd590e", size = 654696, upload-time = "2026-05-07T07:15:03.524Z" },
-    { url = "https://files.pythonhosted.org/packages/ca/14/183a17a7a2712674e0bedfb9473d4eaff4d720f7fabf2d843f3b2ae0d18a/tarsio-0.5.3-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:35aa90f65fe5f788f55c0e66c2d85329f11579f87e2faa639afe6c11f8fa05d8", size = 713036, upload-time = "2026-05-07T07:15:05.02Z" },
-    { url = "https://files.pythonhosted.org/packages/6a/23/9a715e423dfcd5d8d3c23bce4f3abd7f4d8287ebbd1743682cc5ce1dcd4c/tarsio-0.5.3-cp312-cp312-win32.whl", hash = "sha256:b7c92d86592dd7a394afff848fa5c65ddd1ae897637be7f7842537b0e6a800a7", size = 387657, upload-time = "2026-05-07T07:15:06.368Z" },
-    { url = "https://files.pythonhosted.org/packages/d3/77/985c1b4be1dda867b2f125861cdb028902cb20b648e07b5cee84d61746ee/tarsio-0.5.3-cp312-cp312-win_amd64.whl", hash = "sha256:a825b8691e42b4f71a3002c36c362ad379e4bf0b267d33ba9e964242a8f88ce7", size = 395798, upload-time = "2026-05-07T07:15:08.131Z" },
-    { url = "https://files.pythonhosted.org/packages/99/db/c9c18bfdac4d87b61db0a65572110ae7c5d069cda9bf62293f10380e1fa1/tarsio-0.5.3-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:a1fcd769a945076b7fac0eaaaefe075b41896649ebdb2509fdc7c0d84d6893b5", size = 486500, upload-time = "2026-05-07T07:15:09.908Z" },
-    { url = "https://files.pythonhosted.org/packages/a5/59/d159c1645e3d90dc2a418de6c1a9e3b5bc6a8e2bf803e1603b6a35172b09/tarsio-0.5.3-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:cc397b21fe63a5b0050355f78bf6e2f8759ae278a65ac336fe6be9d20be038a3", size = 452917, upload-time = "2026-05-07T07:15:11.512Z" },
-    { url = "https://files.pythonhosted.org/packages/9a/3b/95353759ebc9dddfee9d2f5e7c653cec65a139e80e9c4b0d853e7131439f/tarsio-0.5.3-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:090e97d007b6d93e71d516e7dd42923ee1e0d883b202670dc266c7ff1343e06a", size = 477480, upload-time = "2026-05-07T07:15:13.117Z" },
-    { url = "https://files.pythonhosted.org/packages/dc/4d/9f6dbd1df570a3cb8c7a018eb632e4760f63191be83cbe98f0932fecede2/tarsio-0.5.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:dcc5d751e81225247972fbf7fc6fd9f1c513113c89c466598bcc0f969a66a13e", size = 499032, upload-time = "2026-05-07T07:15:14.721Z" },
-    { url = "https://files.pythonhosted.org/packages/c0/b8/a2c818d0570dcbf055f8e1696810b4479a76600aaef91b4306d3ec3050e9/tarsio-0.5.3-cp313-cp313-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:8fcecf5dd75f528eb6e8f4f049ba393e4a71275e1d11ecfb2017e9eb02a72343", size = 524848, upload-time = "2026-05-07T07:15:16.142Z" },
-    { url = "https://files.pythonhosted.org/packages/15/30/49bdd719a9e4924928bdaa8dbac6b5fce7395cf1f3dd293c74aa81d0602e/tarsio-0.5.3-cp313-cp313-musllinux_1_1_aarch64.whl", hash = "sha256:b99eb7768a3a648d447c2f48b8b3ed2a38341064c63c97f80d20fc66502e3779", size = 654528, upload-time = "2026-05-07T07:15:17.707Z" },
-    { url = "https://files.pythonhosted.org/packages/8a/39/ec91c8803f48ee684bd5227878d2061075f629e3234dcbb3d25c3349655c/tarsio-0.5.3-cp313-cp313-musllinux_1_1_x86_64.whl", hash = "sha256:e5c6d5080bc2726e1f1c9a337e50cefd58015512b97d51f26ef7eacf69b002b1", size = 712922, upload-time = "2026-05-07T07:15:19.127Z" },
-    { url = "https://files.pythonhosted.org/packages/ee/e7/2f0e900db314d42f5f6036437fb35075b55c8a07b5df593d3633b0d2e14f/tarsio-0.5.3-cp313-cp313-win32.whl", hash = "sha256:db7e62f9eddb2c208889cc9086e826abf034aa6eb160161462450b8781e7c541", size = 387057, upload-time = "2026-05-07T07:15:20.961Z" },
-    { url = "https://files.pythonhosted.org/packages/0b/c6/fcd3255e559d3dc6ff9e347d2fc1c02ff5de56e30a00bf8050f56bb1acd6/tarsio-0.5.3-cp313-cp313-win_amd64.whl", hash = "sha256:8956360b23827e4fe78258ae0b062124466a38951e3d99c6da86bd2da9d80a29", size = 395571, upload-time = "2026-05-07T07:15:22.162Z" },
-    { url = "https://files.pythonhosted.org/packages/ee/4d/d60b04a697474628f4c6b64cd4b93bfabbbd4f54fb840edaf6896d823444/tarsio-0.5.3-cp314-cp314-macosx_10_12_x86_64.whl", hash = "sha256:b18a54dea25449e414393ed16ae94fd9aee852617afd91bacb9dda6a40c14a84", size = 486045, upload-time = "2026-05-07T07:15:23.533Z" },
-    { url = "https://files.pythonhosted.org/packages/81/99/807bbc33049e3e0ad76d888098e47e73b276c2d6295e73de83f899fbaa99/tarsio-0.5.3-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:57f6b6d40de022f39b6aaa2e4637383c494f5c97a2fabad47709851a07a3c135", size = 452583, upload-time = "2026-05-07T07:15:24.855Z" },
-    { url = "https://files.pythonhosted.org/packages/ba/a9/e15f97459b25bcd01d1b781bb8e363bb56348b137fab714e64fb4fb00a15/tarsio-0.5.3-cp314-cp314-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:46d01f91f6d6163e924d5f57cdec62833eb33b6b665bf5be16932ca23611614d", size = 478094, upload-time = "2026-05-07T07:15:26.593Z" },
-    { url = "https://files.pythonhosted.org/packages/4d/40/a4429bb088db6c027b23a269e029225c3c2e403ff75cdbecae5d222a81c8/tarsio-0.5.3-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2d93f6a4ca4c0fc57fef946d8e94fbe3cfcdbd6841e4be0536e5d5fb3e7433e7", size = 498215, upload-time = "2026-05-07T07:15:28.223Z" },
-    { url = "https://files.pythonhosted.org/packages/10/89/53c7808f851e9d63fbd431037a35fc73def758fd8437f6694e9c015de616/tarsio-0.5.3-cp314-cp314-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:645b882f0f947aecc39f4178455759e2d0ad57e469c979aa1524d1d2d3341225", size = 523630, upload-time = "2026-05-07T07:15:29.84Z" },
-    { url = "https://files.pythonhosted.org/packages/30/39/c00bdc95702b2ba58c7796c473909320ce43de7166ec030fa39a93ccf4f9/tarsio-0.5.3-cp314-cp314-musllinux_1_1_aarch64.whl", hash = "sha256:4eb4edc535403f705e4b8267889a38888111f2d99eaaa690a7907848434b9a8a", size = 655415, upload-time = "2026-05-07T07:15:31.3Z" },
-    { url = "https://files.pythonhosted.org/packages/81/c6/51b033294f9c8489d6ef454799fabf13217fe9cd51b296fdcb82a5ab4fe8/tarsio-0.5.3-cp314-cp314-musllinux_1_1_x86_64.whl", hash = "sha256:f55253d8b5a3ce61c2f46d84536b396e0b5f426ac4097893631134229b156816", size = 711908, upload-time = "2026-05-07T07:15:32.67Z" },
-    { url = "https://files.pythonhosted.org/packages/6c/0f/a5781f7183479f61ef2adc92a0dfcd2efa7ba1e601d223e00bc775fbcf04/tarsio-0.5.3-cp314-cp314-win32.whl", hash = "sha256:fa6390e4cb37da4d5ad72a5c77c56a681d6e278919a3f2a3be1305414726f6ba", size = 386657, upload-time = "2026-05-07T07:15:34.347Z" },
-    { url = "https://files.pythonhosted.org/packages/06/10/32a87fc3fb6f94bd890ea10b48f1eab9a01a45a5c734feb65268b904dddc/tarsio-0.5.3-cp314-cp314-win_amd64.whl", hash = "sha256:ce513d6e6f4140e7706ac398b86e797927a54775b7f70cdd205bd9733f11214c", size = 393804, upload-time = "2026-05-07T07:15:35.796Z" },
-]
-
-[package.optional-dependencies]
-cli = [
-    { name = "click" },
-    { name = "rich" },
 ]
 
 [[package]]

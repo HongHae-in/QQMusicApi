@@ -15,9 +15,9 @@
   -> Request
   -> await request
   -> Client.execute(request)
-  -> Client.request_api(...)  (根据 request.is_jce 分发改用 JCE 或 JSON 协议)
+  -> Client.request_api(...)
   -> Client._build_result(...)
-  -> 返回原始 dict / TarsDict 或 Pydantic 模型
+  -> 返回原始 dict 或 Pydantic 模型
 ```
 
 ### 批量并发请求
@@ -113,7 +113,6 @@ async def quick_search(self, keyword: str) -> dict[str, Any]:
 | `override_comm`  | `bool`                      | 为 True 时 `comm` 完全替代自动生成的参数；为 False 时合并 |
 | `credential`     | `Credential` 或 `None`      | 覆盖本次请求的凭证                                        |
 | `platform`       | `Platform` 或 `None`        | 覆盖本次请求的平台                                        |
-| `is_jce`         | `bool`                      | 是否作为 JCE (Tars) 二进制协议发送                        |
 | `preserve_bool`  | `bool`                      | 是否保留布尔值原样（默认转为 0/1 整型）                   |
 | `sign`           | `bool`                      | 是否对请求进行签名                                        |
 | `pager_meta`     | `PagerMeta` 或 `None`       | 分页元数据，提供后返回 `PaginatedRequest`                 |
@@ -307,23 +306,6 @@ def get_related_mv(self, songid: int, last_mvid: str | None = None):
 | `BatchRefreshStrategy`           |       换一批 | `refresh_key`                   |
 
 `pager_meta` 与 `refresh_meta` 不能同时声明。
-
-## JCE (Tars) 协议
-
-部分接口使用 JCE 二进制协议而非 JSON。通过 `is_jce=True` 启用：
-
-```python
-def get_something(self):
-    """获取数据 (JCE 协议)."""
-    return self._build_request(
-        module="music.foo.Svc",
-        method="GetSomething",
-        param={0: "value"},  # JCE 使用整数 key
-        is_jce=True,
-    )
-```
-
-JCE 协议的响应会自动解码为 `TarsDict`。
 
 ## 请求签名
 
