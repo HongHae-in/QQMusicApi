@@ -3,7 +3,7 @@
 from typing import Any
 
 from ..core import Platform
-from ..core.pagination import MultiFieldContinuationStrategy, PagerMeta, ResponseAdapter
+from ..core.pagination import MultiFieldContinuationStrategy
 from ..models.private_message import (
     PrivateChatEntriesResponse,
     PrivateConfigResponse,
@@ -22,7 +22,9 @@ PRIVATE_MSG_READ_MODULE = "music.privateMsg.PrivateMsgRead"
 PRIVATE_MSG_WRITE_MODULE = "music.privateMsg.PrivateMsgWrite"
 
 
-def _build_session_list_next_params(params: dict[Any, Any], response: PrivateSessionListResponse, _: ResponseAdapter):
+def _build_session_list_next_params(
+    params: dict[str, Any], response: PrivateSessionListResponse
+) -> dict[str, Any] | None:
     """根据最后一个会话构造会话列表下一页参数."""
     if not response.sessions:
         return None
@@ -30,7 +32,9 @@ def _build_session_list_next_params(params: dict[Any, Any], response: PrivateSes
     return {**params, "last_id": last_session.session_id, "last_time": last_session.sort_time}
 
 
-def _build_message_list_next_params(params: dict[Any, Any], response: PrivateMessageListResponse, _: ResponseAdapter):
+def _build_message_list_next_params(
+    params: dict[str, Any], response: PrivateMessageListResponse
+) -> dict[str, Any] | None:
     """根据最后一条消息构造消息列表下一页参数."""
     if not response.messages:
         return None
@@ -87,14 +91,12 @@ class PrivateMessageApi(ApiModule):
             require_login=True,
             platform=Platform.ANDROID,
             response_model=PrivateSessionListResponse,
-            pager_meta=PagerMeta(
-                strategy=MultiFieldContinuationStrategy(
-                    _build_session_list_next_params,
-                    context_name="private_message_session_list",
-                ),
-                adapter=ResponseAdapter(has_more_flag=lambda response: response.has_more == 1),
+            pager_strategy=MultiFieldContinuationStrategy[PrivateSessionListResponse](
+                _build_session_list_next_params,
+                has_more_extractor=lambda r: r.has_more == 1,
+                context_name="private_message_session_list",
             ),
-        )
+        ).with_extractor(lambda r: r.sessions)
 
     def delete_session(self, session_id: str, *, super_msg_flag: int = 0, credential: Credential | None = None):
         """删除私信会话.
@@ -161,14 +163,12 @@ class PrivateMessageApi(ApiModule):
             require_login=True,
             platform=Platform.ANDROID,
             response_model=PrivateMessageListResponse,
-            pager_meta=PagerMeta(
-                strategy=MultiFieldContinuationStrategy(
-                    _build_message_list_next_params,
-                    context_name="private_message_list",
-                ),
-                adapter=ResponseAdapter(has_more_flag=lambda response: response.has_more == 1),
+            pager_strategy=MultiFieldContinuationStrategy[PrivateMessageListResponse](
+                _build_message_list_next_params,
+                has_more_extractor=lambda r: r.has_more == 1,
+                context_name="private_message_list",
             ),
-        )
+        ).with_extractor(lambda r: r.messages)
 
     def send_message(
         self,

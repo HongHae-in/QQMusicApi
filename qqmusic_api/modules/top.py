@@ -1,6 +1,6 @@
 """排行榜相关 API."""
 
-from ..core.pagination import OffsetStrategy, PagerMeta, ResponseAdapter
+from ..core.pagination import OffsetStrategy
 from ..models.top import TopCategoryResponse, TopDetailResponse
 from ._base import ApiModule
 
@@ -47,11 +47,10 @@ class TopApi(ApiModule):
             param=param,
             preserve_bool=tag,
             response_model=TopDetailResponse,
-            pager_meta=PagerMeta(
-                strategy=OffsetStrategy(offset_key="offset", page_size_key="num"),
-                adapter=ResponseAdapter(
-                    total=lambda response: response.info.total_num,
-                    count=lambda response: len(response.songs),
-                ),
+            pager_strategy=OffsetStrategy[TopDetailResponse](
+                offset_key="offset",
+                page_size_key="num",
+                total_extractor=lambda r: r.info.total_num,
+                count_extractor=lambda r: len(r.songs),
             ),
-        )
+        ).with_extractor(lambda r: r.songs)

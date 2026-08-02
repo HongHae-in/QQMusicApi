@@ -1,11 +1,21 @@
 """搜索相关 API."""
 
 from enum import IntEnum
-from typing import Any, cast
+from typing import Any, Literal, overload
 
 from ..core import Platform
-from ..core.pagination import MultiFieldContinuationStrategy, PagerMeta, PageStrategy, ResponseAdapter
-from ..models.search import GeneralSearchResponse, SearchByTypeResponse, SearchSelector
+from ..core.pagination import MultiFieldContinuationStrategy, PageStrategy
+from ..core.request import ItemPaginatedRequest, PaginatedRequest
+from ..models.search import (
+    AlbumSearch,
+    GeneralSearchResponse,
+    MvSearch,
+    SearchByTypeResponse,
+    SearchSelector,
+    SingerSearch,
+    SongListSearch,
+    SongSearch,
+)
 from ..utils import get_searchID
 from ._base import ApiModule
 
@@ -91,7 +101,7 @@ class SearchApi(ApiModule):
         page_start: dict[str, Any] | None = None,
         *,
         highlight: bool = True,
-    ):
+    ) -> PaginatedRequest[GeneralSearchResponse]:
         """综合搜索.
 
         Args:
@@ -119,22 +129,97 @@ class SearchApi(ApiModule):
             "do_search_v2",
             param,
             response_model=GeneralSearchResponse,
-            pager_meta=PagerMeta(
-                strategy=MultiFieldContinuationStrategy(
-                    lambda params, response, adapter: {
-                        **cast("dict[str, Any]", params),
-                        "searchid": response.searchid,
-                        "page_id": response.nextpage,
-                        "page_start": cast("dict[str, Any]", adapter.get_cursor(response)),
-                    },
-                    context_name="general_search",
-                ),
-                adapter=ResponseAdapter(
-                    has_more_flag=lambda response: response.nextpage != -1,
-                    cursor="nextpage_start",
-                ),
+            pager_strategy=MultiFieldContinuationStrategy[GeneralSearchResponse](
+                lambda params, response: {
+                    **params,
+                    "searchid": response.searchid,
+                    "page_id": response.nextpage,
+                    "page_start": response.nextpage_start,
+                },
+                has_more_extractor=lambda response: response.nextpage != -1,
+                context_name="general_search",
             ),
         )
+
+    @overload
+    def search_by_type(
+        self,
+        keyword: str,
+        search_type: Literal[
+            SearchType.SONG, 0, SearchType.LYRIC, 7, SearchType.AUDIO, 18, SearchType.RINGTONE, 10
+        ] = SearchType.SONG,
+        num: int = 10,
+        page: int = 1,
+        selectors: list[SearchSelector] | None = None,
+        searchid: str | None = None,
+        *,
+        highlight: bool = True,
+    ) -> ItemPaginatedRequest[SearchByTypeResponse, SongSearch]: ...
+
+    @overload
+    def search_by_type(
+        self,
+        keyword: str,
+        search_type: Literal[SearchType.SINGER, 1],
+        num: int = 10,
+        page: int = 1,
+        selectors: list[SearchSelector] | None = None,
+        searchid: str | None = None,
+        *,
+        highlight: bool = True,
+    ) -> ItemPaginatedRequest[SearchByTypeResponse, SingerSearch]: ...
+
+    @overload
+    def search_by_type(
+        self,
+        keyword: str,
+        search_type: Literal[SearchType.ALBUM, 2, SearchType.AUDIO_ALBUM, 15],
+        num: int = 10,
+        page: int = 1,
+        selectors: list[SearchSelector] | None = None,
+        searchid: str | None = None,
+        *,
+        highlight: bool = True,
+    ) -> ItemPaginatedRequest[SearchByTypeResponse, AlbumSearch]: ...
+
+    @overload
+    def search_by_type(
+        self,
+        keyword: str,
+        search_type: Literal[SearchType.SONGLIST, 3],
+        num: int = 10,
+        page: int = 1,
+        selectors: list[SearchSelector] | None = None,
+        searchid: str | None = None,
+        *,
+        highlight: bool = True,
+    ) -> ItemPaginatedRequest[SearchByTypeResponse, SongListSearch]: ...
+
+    @overload
+    def search_by_type(
+        self,
+        keyword: str,
+        search_type: Literal[SearchType.MV, 4],
+        num: int = 10,
+        page: int = 1,
+        selectors: list[SearchSelector] | None = None,
+        searchid: str | None = None,
+        *,
+        highlight: bool = True,
+    ) -> ItemPaginatedRequest[SearchByTypeResponse, MvSearch]: ...
+
+    @overload
+    def search_by_type(
+        self,
+        keyword: str,
+        search_type: Literal[SearchType.USER, 8],
+        num: int = 10,
+        page: int = 1,
+        selectors: list[SearchSelector] | None = None,
+        searchid: str | None = None,
+        *,
+        highlight: bool = True,
+    ) -> ItemPaginatedRequest[SearchByTypeResponse, dict[str, Any]]: ...
 
     def search_by_type(
         self,
@@ -161,6 +246,19 @@ class SearchApi(ApiModule):
             highlight: 是否高亮关键词.
         """
         normalized_search_type = int(SearchType(search_type))
+
+        def _extract_items(
+            r: SearchByTypeResponse,
+        ) -> (
+            list[SongSearch]
+            | list[SingerSearch]
+            | list[AlbumSearch]
+            | list[SongListSearch]
+            | list[MvSearch]
+            | list[dict[str, Any]]
+        ):
+            return r.song or r.singer or r.album or r.songlist or r.mv or r.user or r.audio_alum or []
+
         return self._build_request(
             "music.search.SearchCgiService",
             "DoSearchForQQMusicMobile",
@@ -181,11 +279,11 @@ class SearchApi(ApiModule):
             },
             platform=Platform.ANDROID,
             response_model=SearchByTypeResponse,
-            pager_meta=PagerMeta(
-                strategy=PageStrategy(page_key="page_num", page_size=num, start_page=page),
-                adapter=ResponseAdapter(
-                    has_more_flag=lambda r: getattr(r, "nextpage", -1) != -1,
-                    total="total_num",
-                ),
+            pager_strategy=PageStrategy[SearchByTypeResponse](
+                page_key="page_num",
+                page_size=num,
+                start_page=page,
+                has_more_extractor=lambda r: r.nextpage != -1,
+                total_extractor=lambda r: r.total_num,
             ),
-        )
+        ).with_extractor(_extract_items)

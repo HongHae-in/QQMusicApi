@@ -76,20 +76,14 @@ async def test_search_by_type_with_int(client: Client) -> None:
 
 
 async def test_search_by_type_paginate(client: Client) -> None:
-    """测试搜索分页支持 next 与 has_more."""
-    pager = client.search.search_by_type("周杰伦", num=5, page=1).paginate(limit=2)
+    """测试按类型搜索按页面迭代 (paginate)."""
+    req = client.search.search_by_type("周杰伦", num=5, page=1)
+    pages = [page async for page in req.paginate(limit=2)]
 
-    assert pager.has_more() is True
-    first_page = await pager.next()
-    assert pager.has_more() is True
-    second_page = await pager.next()
-
-    assert first_page.song
-    assert second_page.song
-    assert first_page.nextpage == 2
-    assert pager.has_more() is False
-    with pytest.raises(StopAsyncIteration):
-        await pager.next()
+    assert len(pages) == 2
+    assert pages[0].song
+    assert pages[1].song
+    assert pages[0].nextpage == 2
 
 
 async def test_search_by_type_with_selectors(client: Client) -> None:
@@ -97,3 +91,10 @@ async def test_search_by_type_with_selectors(client: Client) -> None:
     selectors = [SearchSelector(id=4558, name="默认", type=0)]
     result = await client.search.search_by_type("周杰伦", search_type=SearchType.SONG, num=5, selectors=selectors)
     assert result.song is not None
+
+
+async def test_search_by_type_iter_items(client: Client) -> None:
+    """测试搜索按条目迭代 (iter_items)."""
+    req = client.search.search_by_type("周杰伦", search_type=SearchType.SONG, num=5)
+    songs = [song async for song in req.iter_items(limit=10)]
+    assert len(songs) > 5

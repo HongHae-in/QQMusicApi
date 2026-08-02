@@ -1,32 +1,39 @@
 """请求描述符与批量请求容器. 提供对 API 请求的抽象与调度."""
 
 import copy
-from collections.abc import Generator
-from dataclasses import dataclass
+from collections.abc import Callable, Generator, Iterable
+from dataclasses import dataclass, fields
 from dataclasses import replace as dc_replace
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar
 
 from pydantic import BaseModel
-from typing_extensions import overload
+from typing_extensions import Self, overload
 
 from ..models.request import Credential
-from .pagination import PagerMeta, RefreshMeta, RequestResultT, ResponsePager, ResponseRefresher
+from .pagination import (
+    AsyncPager,
+    ItemT_co,
+    PagerStrategy,
+)
 from .versioning import Platform
 
 if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
+
     from .client import Client
 
-
+RequestResultT = TypeVar("RequestResultT", bound=BaseModel | dict[str, Any])
 ResponseModel = TypeVar("ResponseModel", bound=BaseModel)
+NewItemT = TypeVar("NewItemT")
 AllowErrorCodes = Literal["all"] | set[int] | frozenset[int] | tuple[int, ...]
 
 
 @overload
 def _build_result(
     raw: dict[str, Any],
-    response_model: type["ResponseModel"],
-) -> "ResponseModel": ...
+    response_model: type[ResponseModel],
+) -> ResponseModel: ...
 
 
 @overload
@@ -63,7 +70,7 @@ class Request(Generic[RequestResultT]):
     _client: "Client"
     module: str
     method: str
-    param: dict[str, Any] | dict[int, Any]
+    param: dict[str, Any]
     response_model: type[BaseModel] | None = None
     comm: dict[str, int | str | bool] | None = None
     override_comm: bool = False
@@ -95,7 +102,7 @@ class Request(Generic[RequestResultT]):
         comm_items = tuple(sorted(self.comm.items(), key=lambda item: item[0])) if self.comm is not None else None
         return (platform, comm_items, self.override_comm, credential_key, self.sign)
 
-    def replace(self, **changes: Any) -> "Request[RequestResultT]":
+    def replace(self, **changes: Any) -> Self:
         """返回一个应用了修改的新 Request 对象, 不会修改原对象."""
         if "param" not in changes:
             changes["param"] = copy.deepcopy(self.param)
@@ -110,31 +117,104 @@ class Request(Generic[RequestResultT]):
 class PaginatedRequest(Request[RequestResultT]):
     """声明了连续翻页能力的请求描述符."""
 
-    pager_meta: PagerMeta
+    pager_strategy: PagerStrategy[RequestResultT]
 
-    def get_pager_meta(self) -> PagerMeta:
-        """返回连续翻页元数据."""
-        return self.pager_meta
+    def next_request(self, previous_response: RequestResultT) -> Self | None:
+        """根据上一次请求的响应, 构建下一次翻页的请求.
 
-    def paginate(self, limit: int | None = None) -> ResponsePager[RequestResultT]:
+        Args:
+            previous_response: 上一次请求得到的响应.
+
+        Returns:
+            下一次请求的描述符, 如果没有更多则返回 None.
+        """
+        if self.pager_strategy.has_next(self.param, previous_response):
+            next_param = self.pager_strategy.next_params(self.param, previous_response)
+            return self.replace(param=next_param)
+        return None
+
+    def pager(self, limit: int | None = None) -> AsyncPager[RequestResultT]:
+        """返回有状态异步分页器.
+
+        Args:
+            limit: 最大获取页数.
+        """
+        return AsyncPager(self, limit=limit)
+
+    async def collect(self, limit: int | None = None) -> list[RequestResultT]:
+        """收集前 limit 页响应数据为列表.
+
+        Args:
+            limit: 最大获取页数.
+
+        Returns:
+            响应对象列表.
+        """
+        return [response async for response in self.paginate(limit=limit)]
+
+    async def paginate(self, limit: int | None = None) -> "AsyncGenerator[RequestResultT, None]":
         """返回响应的分页迭代器.
 
         Args:
             limit: 最大获取页数.
         """
-        return ResponsePager(self, limit=limit)
+        pager = self.pager(limit=limit)
+        async for response in pager:
+            yield response
+
+    def __aiter__(self) -> "AsyncGenerator[RequestResultT, None]":
+        """返回异步迭代器自身."""
+        return self.paginate()
+
+    def with_extractor(
+        self, extractor: Callable[[RequestResultT], Iterable[NewItemT] | None]
+    ) -> "ItemPaginatedRequest[RequestResultT, NewItemT]":
+        """显式绑定数据项提取器, 返回支持提取项的连续翻页请求描述符.
+
+        Args:
+            extractor: 数据项提取函数.
+
+        Returns:
+            具备 iter_items 与 collect_items 能力的 ItemPaginatedRequest.
+        """
+        kwargs = {f.name: getattr(self, f.name) for f in fields(PaginatedRequest)}
+        kwargs["items_extractor"] = extractor
+        return ItemPaginatedRequest(**kwargs)
 
 
 @dataclass
-class RefreshableRequest(Request[RequestResultT]):
-    """声明了换一批能力的请求描述符."""
+class ItemPaginatedRequest(PaginatedRequest[RequestResultT], Generic[RequestResultT, ItemT_co]):
+    """声明了提取数据项能力的连续翻页请求描述符."""
 
-    refresh_meta: RefreshMeta
+    items_extractor: Callable[[RequestResultT], Iterable[ItemT_co] | None]
 
-    def get_refresh_meta(self) -> RefreshMeta:
-        """返回换一批元数据."""
-        return self.refresh_meta
+    async def iter_items(self, limit: int | None = None) -> "AsyncGenerator[ItemT_co, None]":
+        """跨页展开提取数据项的异步迭代器.
 
-    def refresh(self) -> ResponseRefresher[RequestResultT]:
-        """返回响应的换一批控制器."""
-        return ResponseRefresher(self)
+        Args:
+            limit: 最大提取条目数量.
+
+        Yields:
+            数据项实体.
+        """
+        count = 0
+        async for response in self.paginate():
+            items = self.items_extractor(response)
+            if items is None:
+                continue
+            for item in items:
+                if limit is not None and count >= limit:
+                    return
+                yield item
+                count += 1
+
+    async def collect_items(self, limit: int | None = None) -> list[ItemT_co]:
+        """收集跨页展开的数据项为列表.
+
+        Args:
+            limit: 最大提取条目数量.
+
+        Returns:
+            数据项列表.
+        """
+        return [item async for item in self.iter_items(limit=limit)]
