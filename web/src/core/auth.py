@@ -91,8 +91,8 @@ async def refresh_and_store(client: Client, store: CredentialStore, credential: 
         refreshed = await client.login.refresh_credential(credential)
         await run_sync(store.update, refreshed)
         return refreshed
-    except Exception as exc:
-        logger.error("凭证 %s 刷新或保存失败: %s", credential.musicid, exc, exc_info=True)
+    except Exception:
+        logger.exception("凭证 %s 刷新或保存失败", credential.musicid)
         await run_sync(store.mark_invalid, credential.musicid)
         raise
 
@@ -209,8 +209,8 @@ async def startup_credential_health_check(client: Client, store: CredentialStore
                 try:
                     await refresh_and_store(client, store, credential)
                     logger.info("启动检查: 凭证 %s 刷新成功", musicid)
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.warning("启动检查: 凭证 %s 刷新未通过: %s", musicid, exc)
             elif credential.musickey_create_time > 0 and credential.key_expires_in <= 0:
                 logger.debug("启动检查: 凭证 %s 进行过期检查", musicid)
                 try:
@@ -221,8 +221,8 @@ async def startup_credential_health_check(client: Client, store: CredentialStore
                         logger.info("启动检查: 凭证 %s 刷新成功", musicid)
                     else:
                         logger.debug("启动检查: 凭证 %s 有效", musicid)
-                except Exception as exc:
-                    logger.error("启动检查: 凭证 %s 检查失败: %s", musicid, exc, exc_info=True)
+                except Exception:
+                    logger.exception("启动检查: 凭证 %s 检查失败", musicid)
                     await run_sync(store.mark_invalid, musicid)
             else:
                 logger.debug("启动检查: 凭证 %s 有效", musicid)

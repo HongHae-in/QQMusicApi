@@ -111,17 +111,17 @@ async def _lifespan(app: FastAPI):
     try:
         await services.cache.close()
     except Exception:
-        logger.error("关闭缓存异常", exc_info=True)
+        logger.exception("关闭缓存异常")
     try:
         if services.credential_store is not None:
             services.credential_store.close()
     except Exception:
-        logger.error("关闭凭证存储异常", exc_info=True)
+        logger.exception("关闭凭证存储异常")
     try:
         if services.client is not None:
             await services.client.close()
     except Exception:
-        logger.error("关闭 SDK Client 异常", exc_info=True)
+        logger.exception("关闭 SDK Client 异常")
     logger.info("Web 应用关闭完成")
 
 

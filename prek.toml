@@ -1,14 +1,14 @@
 default_install_hook_types = ["pre-commit", "commit-msg"]
+exclude = '^docs/release-notes\.md$'
 
 [[repos]]
-repo = "https://github.com/pre-commit/pre-commit-hooks"
-rev = "v6.0.0"
+repo = "builtin"
 hooks = [
   { id = "check-added-large-files" },
   { id = "check-merge-conflict" },
   { id = "check-json" },
   { id = "check-toml" },
-  { id = "check-yaml", args = ["--unsafe"] },
+  { id = "check-yaml" },
   { id = "detect-private-key" },
   { id = "end-of-file-fixer", exclude = '^LICENSE|\.(html|csv|txt|svg)$' },
   { id = "pretty-format-json", args = ["--autofix", "--no-ensure-ascii", "--no-sort-keys"] },
@@ -17,7 +17,7 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/commitizen-tools/commitizen"
-rev = "v4.13.9"
+rev = "v4.17.0"
 hooks = [
   { id = "commitizen", additional_dependencies = ["cz-conventional-gitmoji"] },
 ]
@@ -31,7 +31,7 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/DavidAnson/markdownlint-cli2"
-rev = "v0.22.0"
+rev = "v0.23.2"
 hooks = [
   { id = "markdownlint-cli2", args = ["--fix"] },
 ]
