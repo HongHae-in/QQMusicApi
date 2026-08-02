@@ -121,6 +121,13 @@ SINGER_INDEX = (
     Q("num", int, 80, "每页返回数量."),
     Q("page", int, 1, "页码."),
 )
+SINGER_DESC_OPTIONS = (
+    Q("ex_singer", bool, default=True, description="是否返回扩展描述信息."),
+    Q("wiki_singer", bool, default=True, description="是否返回百科 XML 数据."),
+    Q("group_singer", bool, default=True, description="是否返回组合成员信息."),
+    Q("pic", bool, default=True, description="是否返回头像/立绘图片 URL."),
+    Q("photos", bool, default=True, description="是否返回相册大图列表."),
+)
 SONG_RELATED_MV_PAGE = (Q("last_mvid", str | None, None, "上一页最后一个 MV ID."),)
 SONG_RELATED_SONGLIST_PAGE = (Q("last", list[int] | None, None, "上一页游标."),)
 SONGLIST_DETAIL_OPTIONS = (

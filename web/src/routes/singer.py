@@ -14,7 +14,18 @@ from qqmusic_api.models.singer import (
 from qqmusic_api.modules.singer import TabType
 
 from ..routing.route_types import PUBLIC_300, PUBLIC_600, WebRoute
-from ._helpers import MID, SINGER_INDEX, SINGER_PAGE, SINGER_SIMILAR_PAGE, SINGER_TAB_PAGE, SINGER_TYPE, P, Q, R
+from ._helpers import (
+    MID,
+    SINGER_DESC_OPTIONS,
+    SINGER_INDEX,
+    SINGER_PAGE,
+    SINGER_SIMILAR_PAGE,
+    SINGER_TAB_PAGE,
+    SINGER_TYPE,
+    P,
+    Q,
+    R,
+)
 
 ROUTES: tuple[WebRoute, ...] = (
     R(
@@ -30,7 +41,7 @@ ROUTES: tuple[WebRoute, ...] = (
         "get_desc",
         "/singer/get_desc",
         SingerDetailResponse,
-        params=(Q("mids", list[str], description="歌手 MID 列表."),),
+        params=(Q("mids", list[str], description="歌手 MID 列表."), *SINGER_DESC_OPTIONS),
         cache=PUBLIC_300,
     ),
     R(
@@ -38,7 +49,7 @@ ROUTES: tuple[WebRoute, ...] = (
         "get_desc_by_mid",
         "/singer/{mid}/desc",
         SingerDetailResponse,
-        params=MID,
+        params=(*MID, *SINGER_DESC_OPTIONS),
         cache=PUBLIC_300,
     ),
     R("singer", "get_info", "/singer/{mid}/info", HomepageHeaderResponse, params=MID, cache=PUBLIC_300),

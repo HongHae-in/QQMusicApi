@@ -243,16 +243,37 @@ class SingerApi(ApiModule):
             ),
         )
 
-    def get_desc(self, mids: list[str]):
+    def get_desc(
+        self,
+        mids: list[str],
+        *,
+        ex_singer: bool = True,
+        wiki_singer: bool = True,
+        group_singer: bool = True,
+        pic: bool = True,
+        photos: bool = True,
+    ):
         """获取歌手列表的描述信息.
 
         Args:
             mids: 歌手 MID 列表.
+            ex_singer: 是否返回扩展描述信息.
+            wiki_singer: 是否返回百科 XML 数据.
+            group_singer: 是否返回组合成员信息.
+            pic: 是否返回头像/立绘图片 URL.
+            photos: 是否返回相册大图列表.
         """
         return self._build_request(
             module="music.musichallSinger.SingerInfoInter",
             method="GetSingerDetail",
-            param={"singer_mids": mids, "groups": 1, "wikis": 1},
+            param={
+                "singer_mids": mids,
+                "group_singer": group_singer,
+                "wiki_singer": wiki_singer,
+                "ex_singer": ex_singer,
+                "pic": pic,
+                "photos": photos,
+            },
             response_model=SingerDetailResponse,
         )
 

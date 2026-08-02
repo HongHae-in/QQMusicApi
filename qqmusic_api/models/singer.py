@@ -316,6 +316,32 @@ class SingerExtraInfo(Response):
     blog_flag: int = Field(default=0, validation_alias="blogFlag")
 
 
+class SingerPic(Response):
+    """歌手图片地址集合.
+
+    Attributes:
+        big_black: 大图 (暗色背景).
+        big_white: 大图 (亮色背景).
+        pic: 标准尺寸图片.
+    """
+
+    big_black: str = ""
+    big_white: str = ""
+    pic: str = ""
+
+
+class SingerPhotoItem(Response):
+    """歌手相册图片项.
+
+    Attributes:
+        big: 大图地址.
+        small: 小图地址.
+    """
+
+    big: str = ""
+    small: str = ""
+
+
 class SingerDetail(Response):
     """歌手详情条目.
 
@@ -332,7 +358,8 @@ class SingerDetail(Response):
     ex_info: SingerExtraInfo = Field(default_factory=SingerExtraInfo, validation_alias="ex_info")
     wiki: str = ""
     group_list: Annotated[list[dict[str, Any]], NoneToEmptyList] = Field(default_factory=list)
-    photos: Annotated[list[dict[str, Any]], NoneToEmptyList] = Field(default_factory=list)
+    pic: SingerPic = Field(default_factory=SingerPic)
+    photos: Annotated[list[SingerPhotoItem], NoneToEmptyList] = Field(default_factory=list)
     group_info: Annotated[list[dict[str, Any]], NoneToEmptyList] = Field(default_factory=list)
 
 
