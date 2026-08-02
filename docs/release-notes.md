@@ -1,4 +1,46 @@
 
+## [[0.7.1](https://github.com/L-1124/QQMusicApi/compare/v0.7.0..v0.7.1)] - 2026-08-02
+
+### Bug 修复
+
+* **(Song)** 移除 SongApi 中不必要的参数说明 ([e4b02c7](https://github.com/L-1124/QQMusicApi/commit/e4b02c7b0c4ccc8b7310701985bb5c6d62e21f4f)) by [@L-1124](https://github.com/L-1124)
+* **(web)** 使用 context.credential 修复 adapter 凭证读取 KeyError ([261326e](https://github.com/L-1124/QQMusicApi/commit/261326eec051e7f444296b5c461e7412c4b25bb9)) by [@L-1124](https://github.com/L-1124)
+* **(web)** 修复 404 响应不符合 RESTful 规范的问题 ([9658bd5](https://github.com/L-1124/QQMusicApi/commit/9658bd54b45c8eeab75f651ba26b16e1fd1126ce)) by [@L-1124](https://github.com/L-1124)
+* **(web)** 修复 Web 模块代码质量与性能问题 ([329f822](https://github.com/L-1124/QQMusicApi/commit/329f822776376aad7bd6b3ede3e9dd9e5730c77c)) by [@L-1124](https://github.com/L-1124)
+
+### Dep-bump
+
+* **(deps)** update dependencies via uv lock --upgrade ([943ed52](https://github.com/L-1124/QQMusicApi/commit/943ed522e8bf6d385e3a0abb77663255ea57ea25)) by [@L-1124](https://github.com/L-1124)
+
+### 功能更新
+
+* **(comment)** 支持设置评论业务类型与子类型 ([ea6095c](https://github.com/L-1124/QQMusicApi/commit/ea6095ce89772798154cf85785a2d72ee9a57ac4)) by [@L-1124](https://github.com/L-1124)
+* **(lyric)** 支持获取 AI 歌词词典 ([44e81f0](https://github.com/L-1124/QQMusicApi/commit/44e81f0521d73934a3bedacc3ec64870549c5f9c)) by [@L-1124](https://github.com/L-1124)
+* **(lyric)** 支持获取多风格翻译歌词 ([43d6429](https://github.com/L-1124/QQMusicApi/commit/43d64299a3e57779859f4ba5f876f0b11198e2ab)) by [@L-1124](https://github.com/L-1124)
+* **(lyric)** 支持获取助唱标注歌词及信息 ([3166fea](https://github.com/L-1124/QQMusicApi/commit/3166feabf77e223b82dca6922f4e09dd5eed0a15)) by [@L-1124](https://github.com/L-1124)
+* **(search)** 支持彩铃搜索类型 RINGTONE 与彩铃文件类型 RingSongFileType ([6c2118c](https://github.com/L-1124/QQMusicApi/commit/6c2118ccdd6e1e4eed9dd49d82b12bf63664630d)) by [@L-1124](https://github.com/L-1124)
+* **(search)** 类型搜索支持选择器 ([e097442](https://github.com/L-1124/QQMusicApi/commit/e097442d2a7e86f7f77bef016416554591370f41)) by [@L-1124](https://github.com/L-1124)
+* **(web)** 引入 AuthPolicy.OPTIONAL 并对齐 SDK 凭证策略 ([ea29202](https://github.com/L-1124/QQMusicApi/commit/ea29202766ebc9a309c7fb3db495c246323289f7)) by [@L-1124](https://github.com/L-1124)
+* **(web)** 优化枚举参数在 OpenAPI 文档中的说明展示 ([075a1ed](https://github.com/L-1124/QQMusicApi/commit/075a1ed9d964d374b4d34759b7d5f1a3fed937fc)) by [@L-1124](https://github.com/L-1124)
+* **(web)** 支持 list[BaseModel] 类型的 JSON Query 参数解析 ([9dd26ee](https://github.com/L-1124/QQMusicApi/commit/9dd26eeff3871c1a4990c58b23d497737e547ed2)) by [@L-1124](https://github.com/L-1124)
+
+### 功能重构
+
+* **(core)** [**breaking**] 重构并统一分页体系 ([cb41e16](https://github.com/L-1124/QQMusicApi/commit/cb41e16e62e9967010663a94db846dd205d45d1b)) by [@L-1124](https://github.com/L-1124) in [#299](https://github.com/L-1124/QQMusicApi/pull/299)
+* **(core)** [**breaking**] 移除未使用的 JCE 协议支持 ([dca6c7c](https://github.com/L-1124/QQMusicApi/commit/dca6c7cb623942f02d7cad44b986a8c7fbc91858)) by [@L-1124](https://github.com/L-1124)
+* **(lyric)** [**breaking**] 统一 song_id 为 songid ([e6d2a0b](https://github.com/L-1124/QQMusicApi/commit/e6d2a0baae21a3528115635b43a24781b9671017)) by [@L-1124](https://github.com/L-1124)
+* **(web)** 引入 Adapter 注册表机制解耦路由声明 ([8b573c6](https://github.com/L-1124/QQMusicApi/commit/8b573c6a4da79e691762ccf9d81390730260b13c)) by [@L-1124](https://github.com/L-1124)
+
+### 文档更新
+
+* **(api)** 补充缺失的 API 模块和数据模型文档映射 ([8fe6095](https://github.com/L-1124/QQMusicApi/commit/8fe6095b154b35406fa2587e585d1f82373720ac)) by [@L-1124](https://github.com/L-1124)
+
+### 贡献者
+
+* @L-1124
+* @mirkosalvato1-ctrl
+* @github-actions[bot]
+
 ## [[0.7.0](https://github.com/L-1124/QQMusicApi/compare/v0.6.9..v0.7.0)] - 2026-07-22
 
 ### Bug 修复
