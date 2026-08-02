@@ -29,7 +29,7 @@ class LyricApi(ApiModule):
 
         Args:
             value: 歌曲 ID 或 MID.
-            qrc: 是否获取逐字歌词 (逐字歌词可能需要特定权限).
+            qrc: 是否获取逐字歌词.
             trans: 是否获取翻译.
             roma: 是否获取罗马音.
             singing_annotations: 是否获取助唱标注歌词.
