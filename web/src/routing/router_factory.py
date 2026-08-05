@@ -4,8 +4,8 @@ import dataclasses
 import inspect
 import re
 from collections.abc import Callable
-from enum import IntEnum
-from typing import Annotated, Any, get_args, get_origin
+from enum import Enum, IntEnum
+from typing import Annotated, Any, cast, get_args, get_origin
 
 from fastapi import Depends, FastAPI, Path, Query, Request
 from pydantic import BaseModel
@@ -87,7 +87,7 @@ def include_routes(app: FastAPI, routes: tuple[WebRoute, ...]) -> None:
             route.path,
             endpoint,
             methods=[method.value for method in route.methods],
-            tags=list(route.tags or (route.module,)),
+            tags=cast("list[Enum | str]", list(route.tags or (route.module,))),
             summary=summary,
             description=description,
             response_model=ApiResponse[actual_response_model],
