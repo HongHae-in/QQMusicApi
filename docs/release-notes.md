@@ -1,4 +1,28 @@
 
+## [[0.7.2](https://github.com/L-1124/QQMusicApi/compare/v0.7.1..v0.7.2)] - 2026-08-05
+
+### Bug 修复
+
+* **(routing)** 修复 add_api_route tags 参数类型不匹配 ([ee98436](https://github.com/L-1124/QQMusicApi/commit/ee984368c19bca4d164475c272b49fa136566e9e)) by [@L-1124](https://github.com/L-1124)
+
+### 功能更新
+
+* **(search)** 为 quick_search/complete/get_hotkey 添加响应模型 ([b97549f](https://github.com/L-1124/QQMusicApi/commit/b97549fea31f3de9ce68904df932a6c4d73aff45)) by [@L-1124](https://github.com/L-1124)
+* **(singer)** 支持 get_desc 接口详细数据控制参数 ([8a8c7f1](https://github.com/L-1124/QQMusicApi/commit/8a8c7f14262e5b08dc46073e84e43fc43508f392)) by [@L-1124](https://github.com/L-1124)
+
+### 功能重构
+
+* **(core)** [**breaking**] 统一请求调度引擎 ([8b71333](https://github.com/L-1124/QQMusicApi/commit/8b71333835891f851a70354c313c614f558ff8e0)) by [@L-1124](https://github.com/L-1124) in [#301](https://github.com/L-1124/QQMusicApi/pull/301)
+
+### 文档更新
+
+* 更新 lyric.py 中的错误 docstring ([8ec78ce](https://github.com/L-1124/QQMusicApi/commit/8ec78ce3f16805ebe470b8308a96fef925cf8e56)) by [@L-1124](https://github.com/L-1124)
+
+### 贡献者
+
+* @L-1124
+* @github-actions[bot]
+
 ## [[0.7.1](https://github.com/L-1124/QQMusicApi/compare/v0.7.0..v0.7.1)] - 2026-08-02
 
 ### Bug 修复
