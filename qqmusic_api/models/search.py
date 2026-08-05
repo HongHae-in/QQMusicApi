@@ -293,3 +293,177 @@ class GeneralSearchResponse(Response):
     related: GeneralSearchRequestBody[RelatedSearchWord] = Field(
         json_schema_extra={"jsonpath": "$.body.item_related"},
     )
+
+
+class QuickSearchItem(Response):
+    """快速搜索条目.
+
+    Attributes:
+        docid: docid.
+        id: id.
+        mid: mid.
+        name: 名称.
+        singer: 歌手名称.
+        pic: 封面图片地址.
+        vid: MV ID.
+    """
+
+    docid: str = ""
+    id: str = ""
+    mid: str = ""
+    name: str = ""
+    singer: str = ""
+    pic: str = ""
+    vid: str = ""
+
+
+class QuickSearchCategory(Response):
+    """快速搜索分类.
+
+    Attributes:
+        count: 命中数量.
+        itemlist: 条目列表.
+        name: 分类名称.
+        order: 排序权重.
+        type: 分类类型.
+    """
+
+    count: int = 0
+    itemlist: list[QuickSearchItem] = Field(default_factory=list)
+    name: str = ""
+    order: int = 0
+    type: int = 0
+
+
+class QuickSearchResponse(Response):
+    """快速搜索响应.
+
+    Attributes:
+        song: 单曲结果.
+        singer: 歌手结果.
+        album: 专辑结果.
+        mv: MV 结果.
+    """
+
+    song: QuickSearchCategory = Field(json_schema_extra={"jsonpath": "$.data.song"})
+    singer: QuickSearchCategory = Field(json_schema_extra={"jsonpath": "$.data.singer"})
+    album: QuickSearchCategory = Field(json_schema_extra={"jsonpath": "$.data.album"})
+    mv: QuickSearchCategory = Field(json_schema_extra={"jsonpath": "$.data.mv"})
+
+
+class Hotkey(Response):
+    """热搜词条目.
+
+    Attributes:
+        hotkey_id: 热搜词唯一标识.
+        query: 热搜关键词.
+        title: 热搜展示标题.
+        score: 热度得分.
+        kind: 条目类别.
+        type: 条目类型.
+        source: 数据来源.
+        need_top: 是否置顶.
+        subpos: 排序位置.
+        song_type: 关联歌曲类型.
+        direct_id: 直接关联的歌曲 ID.
+        jump_tab: 跳转标签页.
+        jump_url: 跳转链接.
+        cover_pic_url: 封面图片地址.
+        pic_url: 图片地址.
+        description: 描述文案.
+    """
+
+    hotkey_id: str = ""
+    query: str = ""
+    title: str = ""
+    score: str = ""
+    kind: int = 0
+    type: int = 0
+    source: int = 0
+    need_top: int = 0
+    subpos: int = 0
+    song_type: int = 0
+    direct_id: int = 0
+    jump_tab: str = "0"
+    jump_url: str = ""
+    cover_pic_url: str = ""
+    pic_url: str = ""
+    description: str = ""
+
+
+class HotkeyResponse(Response):
+    """热搜词列表响应.
+
+    Attributes:
+        ret_code: 返回码.
+        hotkey_time: 热搜时间戳.
+        track_list_id: 歌单 ID.
+        vec_hotkey: 热搜词列表.
+        vec_reckey: 推荐搜索词列表.
+    """
+
+    ret_code: int = 0
+    hotkey_time: str = ""
+    track_list_id: str = ""
+    vec_hotkey: list[Hotkey] = Field(default_factory=list)
+    vec_reckey: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class CompleteItem(Response):
+    """搜索补全建议条目.
+
+    Attributes:
+        hint: 补全提示文本.
+        hint_hilight: 高亮后的提示文本 (含 `<em>` 标签).
+        docid: docid.
+        type: 条目类型.
+        res_type: 结果类型.
+        score: 匹配得分.
+        pre_search: 是否直接发起搜索.
+        icon: 图标地址.
+        icon_type: 图标类型.
+        jumptab: 跳转标签页.
+        jump_type: 跳转类型.
+        jump_url: 跳转链接.
+        pic_url: 图片地址.
+    """
+
+    hint: str = ""
+    hint_hilight: str = ""
+    docid: str = ""
+    type: int = 0
+    res_type: str = ""
+    score: float = 0.0
+    pre_search: bool = False
+    icon: str = ""
+    icon_type: int = 0
+    jumptab: int = -1
+    jump_type: int = 0
+    jump_url: str = ""
+    pic_url: str = ""
+
+
+class CompleteResponse(Response):
+    """搜索词补全响应.
+
+    Attributes:
+        items: 补全建议条目列表.
+        total_num: 补全结果总数.
+        search_id: 搜索会话 ID.
+        expire_time: 过期时间戳.
+        use_default_search: 是否使用默认搜索词.
+        vec_direct_items: 直达结果列表.
+        vec_related_items: 相关搜索词列表.
+        history_items: 历史搜索词列表.
+    """
+
+    items: list[CompleteItem] = Field(default_factory=list)
+    total_num: int = 0
+    search_id: str = ""
+    expire_time: int = 0
+    use_default_search: int = 0
+    debug_info: str = ""
+    expid: str = ""
+    history_items: list[dict[str, Any]] = Field(default_factory=list)
+    vec_direct_items: list[dict[str, Any]] = Field(default_factory=list)
+    vec_related_items: list[dict[str, Any]] = Field(default_factory=list)

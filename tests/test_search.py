@@ -23,20 +23,20 @@ SEARCH_TYPE_RESULT_FIELDS = {
 async def test_get_hotkey(client: Client) -> None:
     """测试获取热搜词列表."""
     result = await client.search.get_hotkey()
-    assert result["ret_code"] == 0
-    assert result["vec_hotkey"]
+    assert result.ret_code == 0
+    assert result.vec_hotkey
 
 
 async def test_complete(client: Client) -> None:
     """测试搜索词补全建议."""
     result = await client.search.complete("周杰伦")
-    assert result["items"] or result["vec_related_items"] or result["vec_direct_items"]
+    assert result.items or result.vec_related_items or result.vec_direct_items
 
 
 async def test_quick_search(client: Client) -> None:
     """测试快速搜索."""
     result = await client.search.quick_search("周杰伦")
-    assert any(result.get(key) for key in ("song", "singer", "album", "mv"))
+    assert any(getattr(result, key).count for key in ("song", "singer", "album", "mv"))
 
 
 @pytest.mark.parametrize("page", [1, 2])

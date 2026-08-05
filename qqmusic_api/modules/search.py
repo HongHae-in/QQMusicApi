@@ -3,12 +3,15 @@
 from enum import IntEnum
 from typing import Any, Literal, overload
 
-from ..core import ItemPaginatedCgiRequest, Platform
+from ..core import CgiRequest, HttpRequest, ItemPaginatedCgiRequest, Platform
 from ..core.pagination import MultiFieldContinuationStrategy, PageStrategy
 from ..models.search import (
     AlbumSearch,
+    CompleteResponse,
     GeneralSearchResponse,
+    HotkeyResponse,
     MvSearch,
+    QuickSearchResponse,
     SearchByTypeResponse,
     SearchSelector,
     SingerSearch,
@@ -49,19 +52,27 @@ class SearchType(IntEnum):
 class SearchApi(ApiModule):
     """搜索相关 API."""
 
-    def get_hotkey(self):
-        """获取热搜词列表."""
+    def get_hotkey(self) -> CgiRequest[HotkeyResponse]:
+        """获取热搜词列表.
+
+        Returns:
+            CgiRequest[HotkeyResponse]: 热搜词列表请求描述符.
+        """
         return self._build_cgi(
             "music.musicsearch.HotkeyService",
             "GetHotkeyForQQMusicMobile",
             {"search_id": get_searchID()},
+            response_model=HotkeyResponse,
         )
 
-    def complete(self, keyword: str):
+    def complete(self, keyword: str) -> CgiRequest[CompleteResponse]:
         """搜索词补全建议.
 
         Args:
             keyword: 关键词.
+
+        Returns:
+            CgiRequest[CompleteResponse]: 补全建议请求描述符.
         """
         return self._build_cgi(
             "music.smartboxCgi.SmartBoxCgi",
@@ -72,23 +83,24 @@ class SearchApi(ApiModule):
                 "num_per_page": 0,
                 "page_idx": 0,
             },
+            response_model=CompleteResponse,
         )
 
-    async def quick_search(self, keyword: str) -> dict[str, Any]:
-        """快速搜索 (直接返回解析后的 JSON 数据).
+    def quick_search(self, keyword: str) -> HttpRequest[QuickSearchResponse]:
+        """快速搜索.
 
         Args:
             keyword: 关键词.
 
         Returns:
-            dict[str, Any]: 搜索结果字典.
+            HttpRequest[QuickSearchResponse]: 快速搜索结果请求描述符.
         """
-        resp = await self._build_http(
+        return self._build_http(
             "GET",
             "https://c.y.qq.com/splcloud/fcgi-bin/smartbox_new.fcg",
             params={"key": keyword},
+            response_model=QuickSearchResponse,
         )
-        return resp["data"]
 
     def general_search(
         self,
